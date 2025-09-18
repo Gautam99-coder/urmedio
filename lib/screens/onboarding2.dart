@@ -10,7 +10,8 @@ class Onboarding2 extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-          Image.asset("lib/assets/images/inventry.png", height: 450,width: 350,),
+           Padding(padding:EdgeInsets.only(top:60)),
+          Image.asset("lib/assets/images/inventry.png", ),
             const SizedBox(height: 30),
             const Text(
               "Real-Time Inventory Updates",

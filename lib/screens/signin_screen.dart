@@ -52,42 +52,59 @@ class _SigninScreenState extends State<SigninScreen> {
                 icon: Icons.lock,
               ),
 
-              // Remember me + Reset password
-              Row(
-                children: [
-                  Checkbox(
-                    value: rememberMe,
-                    onChanged: (val) {
-                      setState(() {
-                        rememberMe = val ?? false;
-                      });
-                    },
-                  ),
-                  const Text("Remember Me"),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      // TODO: Add reset password screen
-                    },
-                    child: const Text(
-                      "Reset Password",
-                      style: TextStyle(
-                          color: Colors.blue, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+          
+Align(
+  alignment: Alignment.centerRight, // 👈 right-align the entire button
+  child: SizedBox(
+    height: 50,
+    width: double.infinity,
+    child: OutlinedButton(
+      onPressed: () {},
+      style: OutlinedButton.styleFrom(
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Sign in',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 8), // spacing
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20), // 50% radius → circle
+              image: const DecorationImage(
+                image: AssetImage(
+                  'lib/assets/images/circle.png',
+                ),
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.25), // shadow color
+                  blurRadius: 6, // softness
+                  spreadRadius: 1, // how far it spreads
+                  offset: const Offset(2, 4), // horizontal & vertical shift
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+),
 
-              // Sign In Button
-              CustomButton(
-                text: "Sign In",
-                onPressed: () {
-                  // TODO: Handle login logic
-                },
-              ),
-              const SizedBox(height: 20),
-
+   
               // OR Divider
               Row(
                 children: const [
@@ -101,40 +118,48 @@ class _SigninScreenState extends State<SigninScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Google Sign In Button
-              SizedBox(
+              
+SizedBox(
+  height: 30, // ✅ Increased height to fit image properly
   width: double.infinity,
-  height: 50,
-  child: OutlinedButton.icon(
+  child: OutlinedButton(
     onPressed: () {},
-    icon: Container(
-      width: 400,
-      height: 30,
-     
+    style: OutlinedButton.styleFrom(
+      padding: EdgeInsets.zero, // ✅ Remove default padding
+      backgroundColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12), // Match container corners
+      ),
+      side: BorderSide.none,
+    ),
+    child: Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12), // ✅ Rounded corners
         image: const DecorationImage(
           image: AssetImage('lib/assets/images/googleup.png'),
-          fit: BoxFit.cover,
+          fit: BoxFit.cover, // ✅ Fill the space without distortion
         ),
-      ),
-    ),
-    label: const Text(''),
-    style: OutlinedButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.25),
+            blurRadius: 6,
+            spreadRadius: 1,
+            offset: const Offset(2, 4),
+          ),
+        ],
       ),
     ),
   ),
 ),
 
 
+              const SizedBox(height: 10),
 
               // Don’t have an account? Sign Up
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Text("Don’t have an account? "),
+                  const Text("    Don’t have an account? "),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushNamed(context, '/signup');

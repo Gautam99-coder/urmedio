@@ -10,7 +10,8 @@ class Onboarding1 extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("lib/assets/images/clock.png", height: 450,width: 350,),
+            Padding(padding:EdgeInsets.only(top:60)),
+            Image.asset("lib/assets/images/ttt.png"),
             const SizedBox(height: 30),
             const Text(
               "Find Medicines in Need",
