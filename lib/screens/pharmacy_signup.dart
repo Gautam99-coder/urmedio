@@ -26,6 +26,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
     final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           /// 🔹 Full-screen background image
@@ -83,12 +84,12 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       keyboardType: TextInputType.emailAddress,
                       icon: Icons.email,
                     ),
-                    CustomTextField(
-                      label: "Phone Number",
-                      controller: phoneController,
-                      keyboardType: TextInputType.phone,
-                      icon: Icons.phone,
-                    ),
+                    // CustomTextField(
+                    //   label: "Phone Number",
+                    //   controller: phoneController,
+                    //   keyboardType: TextInputType.phone,
+                    //   icon: Icons.phone,
+                    // ),
                     CustomTextField(
                       label: "Password",
                       controller: passwordController,
@@ -121,7 +122,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
                               // TODO: Show terms page
                             },
                             child: const Text(
-                              "I agree to the Terms & Conditions",
+                              "Agree Terms & Conditions",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.black, // 🔹 Changed to black

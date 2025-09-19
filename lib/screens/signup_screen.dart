@@ -93,7 +93,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           });
                         },
                       ),
-                      const Text("Remember Me"),
+                      const Text("Agree Terms & Conditions"),
                       const Spacer(),
                       GestureDetector(
                         onTap: () {

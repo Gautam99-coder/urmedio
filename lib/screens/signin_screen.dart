@@ -71,6 +71,23 @@ class _SigninScreenState extends State<SigninScreen> {
                     icon: Icons.lock,
                   ),
     
+ Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text("  forget your password? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/#');
+                        },
+                        child: const Text(
+                          "Reset password",
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+
     Align(
                     alignment: Alignment.centerRight,
                     child: SizedBox(
@@ -94,12 +111,12 @@ class _SigninScreenState extends State<SigninScreen> {
                             // Text wrapped with InkWell so hover works only on text
                             InkWell(
                               onTap: () {
-                                // handle tap on text
-                              },
+                          Navigator.pushNamed(context, '/homePage');
+                        },
                               hoverColor: Colors.transparent,
                               splashColor: Colors.transparent,
                               child: const Text(
-                                'Sign up',
+                                'Sign in',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,

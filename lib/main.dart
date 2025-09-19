@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/screens/home/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding1.dart';
 import 'screens/onboarding2.dart';
@@ -27,6 +28,7 @@ class UrMedioApp extends StatelessWidget {
         '/signup': (context) => const SignupScreen(),
         '/signin': (context) => const SigninScreen(),
         '/pharmacySignup': (context) => const PharmacySignup(),
+        '/homePage':(context)=> const PharmacyApp(),
       },
     );
   }
