@@ -11,7 +11,7 @@ class Onboarding1 extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(padding:EdgeInsets.only(top:60)),
-            Image.asset("lib/assets/images/ttt.png"),
+            Image.asset("assets/images/ttt.png"),
             const SizedBox(height: 30),
             const Text(
               "Find Medicines in Need",

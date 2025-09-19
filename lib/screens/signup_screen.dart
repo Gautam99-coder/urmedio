@@ -31,7 +31,7 @@ class _SignupScreenState extends State<SignupScreen> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 // IMPORTANT: Replace with the actual path to your background image asset
-                image: AssetImage('lib/assets/images/bg1.png'),
+                image: AssetImage('assets/images/bg1.png'),
                 fit: BoxFit.cover, // This makes the image cover the entire screen
               ),
             ),
@@ -161,7 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   image: const DecorationImage(
                                     image: AssetImage(
-                                        'lib/assets/images/circle.png'),
+                                        'assets/images/circle.png'),
                                     fit: BoxFit.cover,
                                   ),
                                   boxShadow: [
@@ -214,7 +214,7 @@ class _SignupScreenState extends State<SignupScreen> {
                               BorderRadius.circular(12), // ✅ Rounded corners
                           image: const DecorationImage(
                             image:
-                                AssetImage('lib/assets/images/googleup.png'),
+                                AssetImage('assets/images/googleup.png'),
                             fit: BoxFit
                                 .cover, // ✅ Fill the space without distortion
                           ),

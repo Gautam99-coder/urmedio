@@ -32,7 +32,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
           /// 🔹 Full-screen background image
           SizedBox.expand(
             child: Image.asset(
-              'lib/assets/images/bg1.png',
+              'assets/images/bg1.png',
               fit: BoxFit.cover,
             ),
           ),
@@ -184,7 +184,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
                                   borderRadius: BorderRadius.circular(20),
                                   image: const DecorationImage(
                                     image: AssetImage(
-                                        'lib/assets/images/circle.png'),
+                                        'assets/images/circle.png'),
                                     fit: BoxFit.cover,
                                   ),
                                   boxShadow: [

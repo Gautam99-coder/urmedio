@@ -29,7 +29,7 @@ class _SigninScreenState extends State<SigninScreen> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 // You can change this to a different background image if you like
-                image: AssetImage('lib/assets/images/bg1.png'),
+                image: AssetImage('assets/images/bg1.png'),
                 fit: BoxFit.cover, // Ensures the image covers the entire screen
               ),
             ),
@@ -138,7 +138,7 @@ class _SigninScreenState extends State<SigninScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   image: const DecorationImage(
                                     image: AssetImage(
-                                        'lib/assets/images/circle.png'),
+                                        'assets/images/circle.png'),
                                     fit: BoxFit.cover,
                                   ),
                                   boxShadow: [
@@ -191,7 +191,7 @@ class _SigninScreenState extends State<SigninScreen> {
                               BorderRadius.circular(12), // ✅ Rounded corners
                           image: const DecorationImage(
                             image:
-                                AssetImage('lib/assets/images/googleup.png'),
+                                AssetImage('assets/images/googleup.png'),
                             fit: BoxFit
                                 .cover, // ✅ Fill the space without distortion
                           ),

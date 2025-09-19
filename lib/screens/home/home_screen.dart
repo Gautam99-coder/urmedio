@@ -64,22 +64,22 @@ class _HomeScreenState extends State<HomeScreen> {
     Medicine(
         name: 'Cetirizine',
         type: 'Antihistamine',
-        imagePath: 'lib/assets/images/cetirizine.png',
+        imagePath: 'assets/images/med2.png',
         backgroundColor: const Color(0xFFFFF2E8)),
     Medicine(
         name: 'Ibuprofen',
         type: 'Painkiller',
-        imagePath: 'lib/assets/images/ibuprofen.png',
+        imagePath: 'assets/images/med3.png',
         backgroundColor: const Color(0xFFFFF2E8)),
     Medicine(
         name: 'Amoxicillin',
         type: 'Antibiotic',
-        imagePath: 'lib/assets/images/amoxicillin.png',
+        imagePath: 'assets/images/med1.png',
         backgroundColor: const Color(0xFFE5F0E5)),
     Medicine(
         name: 'Omeprazole',
         type: 'Acidity Relief',
-        imagePath: 'lib/assets/images/omeprazole.png',
+        imagePath: 'assets/images/med2.png',
         backgroundColor: const Color(0xFFE5F0E5)),
   ];
   
@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<String> bannerImagePaths = [
     'assets/images/banner1.png',
     'assets/images/banner2.png',
-    'lib/assets/images/banner3.png',
+    'assets/images/banner3.png',
   ];
 
   void _onItemTapped(int index) {
@@ -113,11 +113,11 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: EdgeInsets.all(8.0),
         child: CircleAvatar(
           // ✅ FIX 4: Corrected avatar image path
-          backgroundImage: AssetImage('lib/assets/images/avatar.png'),
+          backgroundImage: AssetImage('assets/images/avatar.jpeg'),
         ),
       ),
       title: const Text(
-        '360020.Rajkot extension',
+        'Mr.RAM\n360020.Rajkot extension',
         style: TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.bold,
