@@ -32,12 +32,14 @@ class Onboarding2 extends StatelessWidget {
                   Navigator.pushReplacementNamed(context, '/signup');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: const Color.fromARGB(255, 13, 67, 111),
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text("Next"),
+                child: const Text("Next",
+                style: TextStyle(fontSize: 14, color: Colors.white)
+                ),
               ),
             ),
           ],

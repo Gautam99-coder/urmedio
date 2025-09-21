@@ -134,106 +134,108 @@ class _PharmacySignupState extends State<PharmacySignup> {
                     ),
                     const SizedBox(height: 0),
 
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: SizedBox(
-                      height: 50,
-                      width: double.infinity,
-                      child: OutlinedButton(
-                        onPressed: () {}, // keep for accessibility if needed
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.only(left: 205),
-                          side: BorderSide.none,
-                          backgroundColor: Colors.transparent,
-                          overlayColor:
-                              Colors.transparent, // 👈 remove button hover/splash
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () {}, // keep for accessibility if needed
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.only(left: 205),
+                            side: BorderSide.none,
+                            backgroundColor: Colors.transparent,
+                            overlayColor:
+                                Colors.transparent, // 👈 remove button hover/splash
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Text wrapped with InkWell so hover works only on text
-                            InkWell(
-                              onTap: () {
-                                // handle tap on text
-                              },
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              child: const Text(
-                                'Sign up',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Circle image also wrapped
-                            InkWell(
-                              onTap: () {
-                                // handle tap on circle
-                              },
-                              hoverColor: Colors.transparent,
-                              splashColor: Colors.transparent,
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: const DecorationImage(
-                                    image: AssetImage(
-                                        'assets/images/circle.png'),
-                                    fit: BoxFit.cover,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Text wrapped with InkWell so hover works only on text
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pushNamed(context, 'phomePage');
+                                  // handle tap on text
+                                },
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                child: const Text(
+                                  'Sign up',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.25),
-                                      blurRadius: 6,
-                                      spreadRadius: 1,
-                                      offset: const Offset(2, 4),
-                                    ),
-                                  ],
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              // Circle image also wrapped
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pushNamed(context, '/phomePage');
+                                  // handle tap on circle
+                                },
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    image: const DecorationImage(
+                                      image: AssetImage(
+                                          'assets/images/circle.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.25),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                        offset: const Offset(2, 4),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // OR Divider
-                  Row(
-                    children: const [
-                      Expanded(child: Divider(thickness: 1)),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("OR"),
-                      ),
-                      Expanded(child: Divider(thickness: 1)),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-          
-                  // Already have account? Sign in
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("Already have an account? "),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushNamed(context, '/signin');
-                        },
-                        child: const Text(
-                          "Sign in",
-                          style: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.bold),
+                    // OR Divider
+                    Row(
+                      children: const [
+                        Expanded(child: Divider(thickness: 1)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("OR"),
                         ),
-                      ),
-                    ],
+                        Expanded(child: Divider(thickness: 1)),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    const SizedBox(height: 5),
+
+                    // Already have account? Sign in
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/signin');
+                          },
+                          child: const Text(
+                            "Sign in",
+                            style: TextStyle(
+                                color: Colors.blue, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

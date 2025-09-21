@@ -1,30 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
-
-// --- Main App Entry Point ---
-void main() {
-  runApp(const PharmacyApp());
-}
-
-class PharmacyApp extends StatelessWidget {
-  const PharmacyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Pharmacy UI',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: const Color(0xFFF9F9F9),
-        fontFamily: 'Roboto',
-      ),
-      home: const HomeScreen(),
-    );
-  }
-}
-
 // --- Data Model for Medicine ---
 class Medicine {
   final String name;
@@ -51,10 +27,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   int _currentCarouselIndex = 0;
-  // ✅ FIX 1: Corrected controller class name
   final CarouselSliderController _carouselController = CarouselSliderController();
 
-  // ✅ FIX 2: Standardized all medicine data to use 'imagePath' with the correct 'lib/' prefix
   final List<Medicine> medicines = [
     Medicine(
         name: 'Paracetamol',
@@ -82,18 +56,36 @@ class _HomeScreenState extends State<HomeScreen> {
         imagePath: 'assets/images/med2.png',
         backgroundColor: const Color(0xFFE5F0E5)),
   ];
-  
-  // ✅ FIX 3: Corrected all banner paths to include 'lib/' prefix
+
   final List<String> bannerImagePaths = [
     'assets/images/banner1.png',
     'assets/images/banner2.png',
     'assets/images/banner3.png',
   ];
 
+  // --- MODIFIED METHOD ---
+  // The navigation logic is now handled here.
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Handle navigation based on the tapped item's index
+    switch (index) {
+      case 0:
+        // Already on home, do nothing or refresh
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/storePage');
+        break;
+      case 2:
+        // Navigate to the product page when cart is tapped
+        Navigator.pushNamed(context, '/cartPage');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/profilePage');
+        break;
+    }
   }
 
   @override
@@ -112,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
       leading: const Padding(
         padding: EdgeInsets.all(8.0),
         child: CircleAvatar(
-          // ✅ FIX 4: Corrected avatar image path
           backgroundImage: AssetImage('assets/images/avatar.jpeg'),
         ),
       ),
@@ -128,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: const BoxDecoration(
-            color: Colors.red,
+            color: Color.fromARGB(255, 142, 37, 29),
             shape: BoxShape.circle,
           ),
           child: IconButton(
@@ -138,7 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         IconButton(
           icon: const Icon(Icons.notifications_none, color: Colors.black54, size: 28),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/notificationsrc');
+          },
         ),
         const SizedBox(width: 8),
       ],
@@ -197,20 +190,12 @@ class _HomeScreenState extends State<HomeScreen> {
           carouselController: _carouselController,
           itemBuilder: (context, index, realIndex) {
             final imagePath = bannerImagePaths[index];
-            return GestureDetector(
-              onTap: () {
-                print('Tapped on banner image: $imagePath');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Tapped on banner ${index + 1}')),
-                );
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: Image.asset(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                ),
+            return ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                width: double.infinity,
               ),
             );
           },
@@ -218,7 +203,6 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 180.0,
             autoPlay: true,
             enlargeCenterPage: true,
-            aspectRatio: 16 / 9,
             viewportFraction: 1.0,
             onPageChanged: (index, reason) {
               setState(() {
@@ -265,28 +249,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // --- UPDATED WIDGET ---
+  // Uses `icon` for the default state and `activeIcon` for the selected state.
   BottomNavigationBar _buildBottomNavigationBar() {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home_outlined),
+          activeIcon: Icon(Icons.home),
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.store),
+          icon: Icon(Icons.store_outlined),
+          activeIcon: Icon(Icons.store),
           label: 'Store',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
+          icon: Icon(Icons.shopping_cart_outlined),
+          activeIcon: Icon(Icons.shopping_cart),
           label: 'Cart',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
           label: 'Profile',
         ),
       ],
       currentIndex: _selectedIndex,
-      selectedItemColor: Colors.blueAccent,
+      selectedItemColor: const Color.fromARGB(255, 22, 50, 98),
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
@@ -295,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// --- Medicine Card Widget (Unchanged) ---
 class MedicineCard extends StatelessWidget {
   final Medicine medicine;
 
@@ -305,69 +296,76 @@ class MedicineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              decoration: BoxDecoration(
-                color: medicine.backgroundColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+    // This InkWell makes the card tappable
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        Navigator.pushNamed(context, '/productPage');
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: medicine.backgroundColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Image.asset(
+                    medicine.imagePath,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
+            ),
+            Expanded(
+              flex: 2,
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
-                child: Image.asset(
-                  medicine.imagePath,
-                  fit: BoxFit.contain,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      medicine.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      medicine.type,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    medicine.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    medicine.type,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
