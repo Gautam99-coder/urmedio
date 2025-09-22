@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:urmedio/screens/address/addnewaddress_screen.dart';
 import 'package:urmedio/screens/address/location_screen.dart';
 import 'package:urmedio/screens/admin/add_medicine_screen.dart';
+import 'package:urmedio/screens/admin/address_screen.dart';
+import 'package:urmedio/screens/admin/earnings_screen.dart';
 import 'package:urmedio/screens/admin/inventory_screen.dart';
 import 'package:urmedio/screens/admin/orders_dashboard_screen.dart';
+import 'package:urmedio/screens/admin/pedit_profile_screen.dart';
 import 'package:urmedio/screens/admin/updatastock_screen.dart';
 import 'package:urmedio/screens/auth/forgetpassword_screen.dart';
 import 'package:urmedio/screens/auth/otp_screen.dart';
@@ -11,15 +14,20 @@ import 'package:urmedio/screens/auth/reset_password_screen.dart';
 import 'package:urmedio/screens/cart/cart_screen.dart';
 import 'package:urmedio/screens/checkout/checkout_payment_screen.dart';
 import 'package:urmedio/screens/checkout/order_confirmation_screen.dart';
+import 'package:urmedio/screens/contact_us_screen.dart';
+import 'package:urmedio/screens/faq_screen.dart';
 import 'package:urmedio/screens/home/home_screen.dart';
 import 'package:urmedio/screens/home/phome_screen.dart';
 import 'package:urmedio/screens/medicines/order_recived_screen.dart';
 import 'package:urmedio/screens/medicines/product_detail_screen.dart';
 import 'package:urmedio/screens/medicines/storePage_screen.dart';
+import 'package:urmedio/screens/privacy_policy_screen.dart';
+import 'package:urmedio/screens/profile/aprofile_screen.dart';
 import 'package:urmedio/screens/profile/edit_profile_screen.dart';
 import 'package:urmedio/screens/profile/my_order_screen.dart';
 import 'package:urmedio/screens/profile/profile_screen.dart';
 import 'package:urmedio/screens/save_address_screen.dart';
+import 'package:urmedio/screens/term_of_services_screen.dart';
 import 'package:urmedio/screens/view/notification_screen.dart';
 import 'package:urmedio/screens/view/pharmacydetail_screen.dart';
 import 'package:urmedio/widgets/setting_screen.dart';
@@ -76,6 +84,15 @@ class UrMedioApp extends StatelessWidget {
        '/updatestock':(context)=> const UpdateStockScreen(),
        '/orderSrc':(context)=> const OrdersScreen(),
        '/inventry':(context)=> const InventoryScreen(),
+       '/aprofile':(context)=> const AprofileScreen(),
+       '/aeditp':(context)=> const PeditProfileScreen(),
+       '/earning':(context)=> const EarningsScreen(),
+       '/plocation':(context)=> const AddAddressScreen(),
+       '/contactUs':(context)=> const ContactUsScreen(),
+       '/faq':(context)=> const FaqScreen(),
+       '/tos':(context)=> const TermsOfServiceScreen(),
+       '/pp':(context)=> const PrivacyPolicyScreen(),
+
 
       },
     );

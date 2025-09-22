@@ -77,7 +77,7 @@ class _SigninScreenState extends State<SigninScreen> {
                       const Text("  forget your password? "),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, '/#');
+                          Navigator.pushNamed(context, '/forgetPass');
                         },
                         child: const Text(
                           "Reset password",
@@ -127,6 +127,7 @@ class _SigninScreenState extends State<SigninScreen> {
                             // Circle image also wrapped
                             InkWell(
                               onTap: () {
+                                Navigator.pushNamed(context, '/homePage');
                                 // handle tap on circle
                               },
                               hoverColor: Colors.transparent,

@@ -36,12 +36,16 @@ class _PhomeScreenState extends State<PhomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: const [
-          Icon(Icons.settings_outlined, color: Colors.black),
-          SizedBox(width: 10),
-          Icon(Icons.notifications_none, color: Colors.black),
-          SizedBox(width: 10),
-        ],
+actions: [
+  IconButton(
+    icon: const Icon(Icons.settings_outlined, color: Colors.black),
+    onPressed: () {
+      // This line triggers the navigation to the '/settings' route
+      Navigator.pushNamed(context, '/settingScr');
+    },
+  ),
+  const SizedBox(width: 10),
+],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),

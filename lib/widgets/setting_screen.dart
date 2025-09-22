@@ -184,6 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationSetting(
               title: 'Contact Us',
               onTap: () {
+                Navigator.pushNamed(context, '/contactUs');
                 // Navigate to Contact Us screen
                 // Navigator.pushNamed(context, '/contactUs');
               },
@@ -191,6 +192,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationSetting(
               title: 'FAQ',
               onTap: () {
+                Navigator.pushNamed(context, '/faq');
                 // Navigate to FAQ screen
                 // Navigator.pushNamed(context, '/faq');
               },
@@ -214,6 +216,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationSetting(
               title: 'Terms of Service',
               onTap: () {
+                Navigator.pushNamed(context, '/tos');
                 // Navigate to Terms of Service screen
                 // Navigator.pushNamed(context, '/termsOfService');
               },
@@ -221,6 +224,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationSetting(
               title: 'Privacy Policy',
               onTap: () {
+                Navigator.pushNamed(context, '/pp');
                 // Navigate to Privacy Policy screen
                 // Navigator.pushNamed(context, '/privacyPolicy');
               },

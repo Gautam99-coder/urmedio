@@ -25,7 +25,7 @@ class _PBottomNavBarState extends State<PBottomNavBar> {
     } else if (index == 2) {
       Navigator.pushReplacementNamed(context, '/inventry');
     } else if (index == 3) {
-      Navigator.pushReplacementNamed(context, '/profile');
+      Navigator.pushReplacementNamed(context, '/aprofile');
     }
   }
 
@@ -38,7 +38,7 @@ class _PBottomNavBarState extends State<PBottomNavBar> {
       return 1;
     } else if (currentRoute == '/inventry') {
       return 2;
-    } else if (currentRoute == '/profile') {
+    } else if (currentRoute == '/aprofile') {
       return 3;
     }
     return 0; // Default to dashboard/home
