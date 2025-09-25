@@ -46,7 +46,7 @@ class ContactUsScreen extends StatelessWidget {
               'Have any questions or feedback? We’d love to hear from you. Reach out to us using any of the methods below.',
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey[700],
+                color: Colors.grey[701],
                 height: 1.5,
               ),
             ),
