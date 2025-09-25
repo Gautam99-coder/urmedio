@@ -37,6 +37,7 @@ import 'screens/onboarding2.dart';
 import 'screens/signup_screen.dart';
 import 'screens/signin_screen.dart';
 import 'screens/pharmacy_signup.dart';
+///
 
 void main() {
   runApp(const UrMedioApp());
