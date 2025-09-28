@@ -19,7 +19,9 @@ class InventoryScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pushNamed(context, '/addMedicine');
+              },
               style: TextButton.styleFrom(
                 backgroundColor: const Color(0xFFE3F2FD),
                 shape: RoundedRectangleBorder(
