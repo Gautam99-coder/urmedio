@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -44,7 +45,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color.fromARGB(255, 14, 58, 95),
+      selectedItemColor: AppColors.primaryButton,
       unselectedItemColor: Colors.grey,
       currentIndex: _currentIndex,
       onTap: _onItemTapped,

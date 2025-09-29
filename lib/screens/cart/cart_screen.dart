@@ -127,7 +127,7 @@ class CartScreen extends StatelessWidget {
 }
 
 /// A custom widget to represent a single item in the cart.
-class _CartItem extends StatelessWidget {
+class _CartItem extends StatefulWidget {
   final String name;
   final String detail;
   final int quantity;
@@ -141,6 +141,33 @@ class _CartItem extends StatelessWidget {
   });
 
   @override
+  State<_CartItem> createState() => _CartItemState();
+}
+
+class _CartItemState extends State<_CartItem> {
+  late int _quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    _quantity = widget.quantity;
+  }
+
+  void _increment() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+  void _decrement() {
+    if (_quantity > 1) {
+      setState(() {
+        _quantity--;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
@@ -148,7 +175,7 @@ class _CartItem extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
-            imagePath, // Use the image path here
+            widget.imagePath, // Use the image path here
             width: 70,
             height: 70,
             fit: BoxFit.cover,
@@ -161,12 +188,12 @@ class _CartItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                name,
+                widget.name,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 4),
               Text(
-                detail,
+                widget.detail,
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ],
@@ -184,17 +211,17 @@ class _CartItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 constraints: const BoxConstraints(),
                 icon: const Icon(Icons.remove, size: 20),
-                onPressed: () {},
+                onPressed: _decrement,
               ),
               Text(
-                '$quantity',
+                '$_quantity',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               IconButton(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 constraints: const BoxConstraints(),
                 icon: const Icon(Icons.add, size: 20),
-                onPressed: () {},
+                onPressed: _increment,
               ),
             ],
           ),

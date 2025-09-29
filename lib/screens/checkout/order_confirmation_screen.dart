@@ -130,7 +130,7 @@ class OrderConfirmationScreen extends StatelessWidget {
               child: OutlinedButton(
                 onPressed: () {
                   // Navigate back to the home page or store screen
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  Navigator.pushNamed(context, '/homePage');
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

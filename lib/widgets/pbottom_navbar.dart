@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 
 class PBottomNavBar extends StatefulWidget {
   const PBottomNavBar({Key? key, required int selectedIndex, required void Function(int index) onItemTapped}) : super(key: key);
@@ -51,7 +52,7 @@ class _PBottomNavBarState extends State<PBottomNavBar> {
 
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
+      selectedItemColor: AppColors.primaryButton,
       unselectedItemColor: Colors.grey,
       currentIndex: currentIndex,
       onTap: _onItemTapped,

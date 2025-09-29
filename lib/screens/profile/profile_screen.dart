@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/bottom_navbar.dart'; // Import the custom BottomNavBar widget
 
 class ProfileScreen extends StatelessWidget {
@@ -42,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Define the primary blue color from the UI
-    const primaryBlue = Color.fromARGB(255, 20, 40, 95);
+    const primaryBlue=AppColors.primaryButton;
 
     return Scaffold(
       backgroundColor: Colors.blue[50],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:urmedio/theme/colors.dart';
 
 // --- Data Model for Medicine ---
 class Medicine {
@@ -155,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color:AppColors.primaryButton,
               ),
             ),
             const SizedBox(height: 16),
@@ -276,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
       currentIndex: _selectedIndex,
-      selectedItemColor: const Color.fromARGB(255, 22, 50, 98),
+      selectedItemColor: AppColors.primaryButton,
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,

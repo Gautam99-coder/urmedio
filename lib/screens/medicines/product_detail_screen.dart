@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/bottom_navbar.dart'; // Import the custom BottomNavBar widget
 
 class MedicineDetailsScreen extends StatelessWidget {
@@ -205,14 +206,16 @@ class MedicineDetailsScreen extends StatelessWidget {
             side: BorderSide(color: Colors.grey.shade300),
           ),
           child: const Icon(Icons.add_shopping_cart_outlined,
-              color: Color.fromARGB(255, 25, 59, 88)),
+              color: AppColors.primaryButton),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, "/checkoutPage");
+            },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 22, 64, 99),
+              backgroundColor: AppColors.primaryButton,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(

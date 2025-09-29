@@ -1,6 +1,7 @@
 // lib/profile_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/pbottom_navbar.dart'; // <-- Import your custom nav bar
 
 class AprofileScreen extends StatefulWidget {
@@ -94,7 +95,7 @@ class _AprofileScreenState extends State<AprofileScreen> {
                   Navigator.pushNamed(context, '/signin');
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D63F3),
+                  backgroundColor: AppColors.primaryButton,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

@@ -1,7 +1,28 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
-class EditProfileScreen extends StatelessWidget {
+class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
+
+  @override
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
+}
+
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  File? _profileImage;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+    }
+    // It stays on the same page, no redirect
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,24 +53,30 @@ class EditProfileScreen extends StatelessWidget {
             // Profile Photo
             Stack(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 60,
-                  backgroundColor: Color(0xFFFDEEE5),
+                  backgroundColor: const Color(0xFFFDEEE5),
                   child: CircleAvatar(
                     radius: 56,
-                    backgroundImage: AssetImage('assets/images/avatar.jpeg'),
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : const AssetImage('assets/images/avatar.jpeg')
+                            as ImageProvider,
                   ),
                 ),
                 Positioned(
                   bottom: 0,
                   right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
+                  child: InkWell(
+                    onTap: _pickImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.edit, color: Colors.white, size: 20),
                     ),
-                    child: const Icon(Icons.edit, color: Colors.white, size: 20),
                   ),
                 ),
               ],
@@ -60,12 +87,18 @@ class EditProfileScreen extends StatelessWidget {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Change Profile Photo',
-              style: TextStyle(color: Color.fromARGB(255, 12, 52, 85), fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: _pickImage,
+              child: const Text(
+                'Change Profile Photo',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 12, 52, 85),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 32),
-            
+
             // Input Fields
             _buildTextField('Name'),
             const SizedBox(height: 16),
@@ -79,8 +112,10 @@ class EditProfileScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context,'');
-                  // Add save logic here
+                  // Save logic can go here
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Changes saved successfully")),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
