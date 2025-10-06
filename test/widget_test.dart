@@ -8,13 +8,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Assuming your main app class is defined in 'package:urmedio/main.dart'
 import 'package:urmedio/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App starts without errors (Smoke Test)', (WidgetTester tester) async {
+    // Build our app using the correct class name: UrMedioApp
+    await tester.pumpWidget(const UrMedioApp());
 
+    // You can now verify that key elements of your initial screen (SplashScreen or Onboarding) load correctly.
+    // Since this is a smoke test, we'll just check for the MaterialApp to confirm the build works.
+    expect(find.byType(MaterialApp), findsOneWidget);
+    
+    // NOTE: The original counter test logic below is for the default app template.
+    // It is commented out as it won't apply to your app structure (which starts with SplashScreen).
+    
+    /*
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsNothing);
@@ -26,5 +35,6 @@ void main() {
     // Verify that our counter has incremented.
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsOneWidget);
+    */
   });
 }

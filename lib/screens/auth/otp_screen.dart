@@ -170,10 +170,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             child: ElevatedButton(
                               onPressed: () {
                                 // Concatenate the OTP and handle verification
-                                String otp = _fieldOne.text +
-                                    _fieldTwo.text +
-                                    _fieldThree.text +
-                                    _fieldFour.text;
                                 // Implement verification logic here
                                 Navigator.pushNamed(context, '/restPass');
                               },

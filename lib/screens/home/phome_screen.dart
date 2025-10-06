@@ -107,20 +107,7 @@ actions: [
             ),
             const SizedBox(height: 10),
             // Analytics Button
-            Align(
-              alignment: Alignment.centerRight,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.grey),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: const Text('Analytics', style: TextStyle(color: Colors.black)),
-              ),
-            ),
-            const SizedBox(height: 10),
+            
             // Medicine List
             const MedicineItem(
               status: 'In Stock',

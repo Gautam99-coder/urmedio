@@ -1,8 +1,82 @@
 import 'package:flutter/material.dart';
-import 'package:urmedio/widgets/bottom_navbar.dart'; // Import the custom BottomNavBar
+import 'package:urmedio/theme/colors.dart';
+// Assuming AppColors is available from this import, or replace with hardcoded color
+// import 'package:urmedio/theme/colors.dart'; 
+import 'package:urmedio/widgets/bottom_navbar.dart'; 
 
-class CartScreen extends StatelessWidget {
+// --- Cart Item Data Model (for demonstration) ---
+// In a real app, this would come from the Medicine model, but we define it here 
+// to work with the static list inside the CartScreen.
+class CartItemData {
+  final String name;
+  final String detail;
+  int quantity; // Can change
+  final String imagePath;
+  final double price; // Price per unit
+
+  CartItemData({
+    required this.name,
+    required this.detail,
+    required this.quantity,
+    required this.imagePath,
+    required this.price,
+  });
+}
+
+// --- CartScreen (Converted to StatefulWidget) ---
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  // Hardcoded data list with unit prices
+  final List<CartItemData> _cartItems = [
+    CartItemData(
+      imagePath: 'assets/images/med1.png',
+      name: 'Pain Relief Tablets',
+      detail: '100mg',
+      quantity: 2,
+      price: 15.00, // Example Unit Price
+    ),
+    CartItemData(
+      imagePath: 'assets/images/med2.png',
+      name: 'Cold & Flu Capsules',
+      detail: '500mg',
+      quantity: 1,
+      price: 20.00, // Example Unit Price
+    ),
+    CartItemData(
+      imagePath: 'assets/images/med3.png',
+      name: 'Allergy Relief Pills',
+      detail: '200mg',
+      quantity: 3,
+      price: 10.00, // Example Unit Price
+    ),
+  ];
+
+  final double _shippingCost = 30.00;
+
+  // --- Calculation Logic ---
+  double get _subtotal {
+    double total = 0.0;
+    for (var item in _cartItems) {
+      total += item.price * item.quantity;
+    }
+    return total;
+  }
+
+  double get _total => _subtotal + _shippingCost;
+  
+  // --- Callback Function to handle quantity change from child widget ---
+  void _updateQuantity(CartItemData item, int newQuantity) {
+    setState(() {
+      item.quantity = newQuantity;
+      // State updated, _subtotal and _total getters will automatically recalculate
+    });
+  }
 
   /// Helper widget to build the rows in the summary section.
   Widget _buildSummaryRow(String title, String amount, {bool isTotal = false}) {
@@ -21,7 +95,7 @@ class CartScreen extends StatelessWidget {
           amount,
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
             color: isTotal ? Colors.black : Colors.grey[850],
           ),
         ),
@@ -31,6 +105,9 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine the primary button color safely
+    final primaryButtonColor = Theme.of(context).primaryColor; // Fallback to Theme primary color
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -57,37 +134,29 @@ class CartScreen extends StatelessWidget {
             Expanded(
               child: ListView(
                 children: [
-                  const _CartItem(
-                    imagePath: 'assets/images/med1.png',
-                    name: 'Pain Relief Tablets',
-                    detail: '100mg',
-                    quantity: 2,
-                  ),
+                  // Dynamically generate cart items
+                  ..._cartItems.map((item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 20.0),
+                        child: _CartItem(
+                          item: item,
+                          onQuantityChanged: _updateQuantity,
+                        ),
+                      )),
+                      
                   const SizedBox(height: 20),
-                  const _CartItem(
-                    imagePath: 'assets/images/med2.png',
-                    name: 'Cold & Flu Capsules',
-                    detail: '500mg',
-                    quantity: 1,
-                  ),
-                  const SizedBox(height: 20),
-                  const _CartItem(
-                    imagePath: 'assets/images/med3.png',
-                    name: 'Allergy Relief Pills',
-                    detail: '200mg',
-                    quantity: 3,
-                  ),
-                  const SizedBox(height: 40),
+                  
                   const Text(
                     'Summary',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                  _buildSummaryRow('Subtotal', 'Rs. 80.00'),
+                  
+                  // Summary Rows using dynamic calculations
+                  _buildSummaryRow('Subtotal', 'Rs. ${_subtotal.toStringAsFixed(2)}'),
                   const SizedBox(height: 12),
-                  _buildSummaryRow('Shipping', 'Rs. 30.00'),
+                  _buildSummaryRow('Shipping', 'Rs. ${_shippingCost.toStringAsFixed(2)}'),
                   const Divider(height: 32, thickness: 1),
-                  _buildSummaryRow('Total', 'Rs. 110.00', isTotal: true),
+                  _buildSummaryRow('Total', 'Rs. ${_total.toStringAsFixed(2)}', isTotal: true),
                 ],
               ),
             ),
@@ -101,7 +170,8 @@ class CartScreen extends StatelessWidget {
                     // Add checkout logic
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 19, 40, 77),
+                    // Using primaryButtonColor here as AppColors.primaryButton is inaccessible
+                    backgroundColor: AppColors.primaryButton, 
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -127,17 +197,14 @@ class CartScreen extends StatelessWidget {
 }
 
 /// A custom widget to represent a single item in the cart.
+// Renamed to accept CartItemData and a callback
 class _CartItem extends StatefulWidget {
-  final String name;
-  final String detail;
-  final int quantity;
-  final String imagePath;
+  final CartItemData item;
+  final Function(CartItemData item, int newQuantity) onQuantityChanged;
 
   const _CartItem({
-    required this.name,
-    required this.detail,
-    required this.quantity,
-    required this.imagePath,
+    required this.item,
+    required this.onQuantityChanged,
   });
 
   @override
@@ -145,25 +212,19 @@ class _CartItem extends StatefulWidget {
 }
 
 class _CartItemState extends State<_CartItem> {
-  late int _quantity;
-
-  @override
-  void initState() {
-    super.initState();
-    _quantity = widget.quantity;
-  }
+  // Removed local _quantity; quantity is managed in the parent's data model
 
   void _increment() {
-    setState(() {
-      _quantity++;
-    });
+    int newQuantity = widget.item.quantity + 1;
+    // Pass the change up to the parent widget
+    widget.onQuantityChanged(widget.item, newQuantity);
   }
 
   void _decrement() {
-    if (_quantity > 1) {
-      setState(() {
-        _quantity--;
-      });
+    if (widget.item.quantity > 1) {
+      int newQuantity = widget.item.quantity - 1;
+      // Pass the change up to the parent widget
+      widget.onQuantityChanged(widget.item, newQuantity);
     }
   }
 
@@ -174,11 +235,15 @@ class _CartItemState extends State<_CartItem> {
         // Image from asset path
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            widget.imagePath, // Use the image path here
-            width: 70,
-            height: 70,
-            fit: BoxFit.cover,
+          child: Container(
+            // Use a light background color for the image container to match the UI visual
+            color: Colors.orange.shade50, 
+            child: Image.asset(
+              widget.item.imagePath, // Use the image path here
+              width: 70,
+              height: 70,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(width: 16),
@@ -188,12 +253,12 @@ class _CartItemState extends State<_CartItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.name,
+                widget.item.name,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 4),
               Text(
-                widget.detail,
+                widget.item.detail,
                 style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ],
@@ -214,7 +279,8 @@ class _CartItemState extends State<_CartItem> {
                 onPressed: _decrement,
               ),
               Text(
-                '$_quantity',
+                // Read quantity directly from the centralized data model
+                '${widget.item.quantity}', 
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               IconButton(

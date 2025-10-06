@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:urmedio/theme/colors.dart';
+// Note: You must ensure 'Medicine' and 'allMedicines' are available 
+// either by a correct import or by defining them here.
+// I'm assuming 'allMedicines' is available globally/from a proper import path.
+import 'package:urmedio/widgets/medicine_card.dart'; // Assuming this imports the Medicine class
+//import '../home/medicine_data.dart'; // **Crucial: Assuming this path contains 'allMedicines' list**
 
-// --- Data Model for Medicine ---
-class Medicine {
-  final String name;
-  final String type;
-  final String imagePath;
-  final Color backgroundColor;
-
-  Medicine({
-    required this.name,
-    required this.type,
-    required this.imagePath,
-    required this.backgroundColor,
-  });
-}
-
-// --- Home Screen Widget ---
+// --- Home Screen Widget (Modified) ---
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -28,35 +17,28 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   int _currentCarouselIndex = 0;
-  final CarouselSliderController _carouselController = CarouselSliderController();
+  final CarouselSliderController _carouselController = CarouselSliderController(); // Corrected class name
 
-  final List<Medicine> medicines = [
-    Medicine(
-        name: 'Paracetamol',
-        type: 'Pain Relief',
-        imagePath: 'assets/images/med1.png',
-        backgroundColor: const Color(0xFFE5F0E5)),
-    Medicine(
-        name: 'Cetirizine',
-        type: 'Antihistamine',
-        imagePath: 'assets/images/med2.png',
-        backgroundColor: const Color(0xFFFFF2E8)),
-    Medicine(
-        name: 'Ibuprofen',
-        type: 'Painkiller',
-        imagePath: 'assets/images/med3.png',
-        backgroundColor: const Color(0xFFFFF2E8)),
-    Medicine(
-        name: 'Amoxicillin',
-        type: 'Antibiotic',
-        imagePath: 'assets/images/med1.png',
-        backgroundColor: const Color(0xFFE5F0E5)),
-    Medicine(
-        name: 'Omeprazole',
-        type: 'Acidity Relief',
-        imagePath: 'assets/images/med2.png',
-        backgroundColor: const Color(0xFFE5F0E5)),
-  ];
+  // State variable to hold the search query
+  String _searchQuery = ''; 
+
+  // Master list of all medicines (unchanged)
+  final List<Medicine> _masterMedicines = allMedicines; 
+
+  // Computed property to get the list to display (filtered)
+  List<Medicine> get _filteredMedicines {
+    if (_searchQuery.isEmpty) {
+      // If search is empty, show the default list
+      return _masterMedicines;
+    }
+    
+    // Filter by medicine name or type
+    final query = _searchQuery.toLowerCase();
+    return _masterMedicines.where((med) {
+      return med.name.toLowerCase().contains(query) || 
+             med.type.toLowerCase().contains(query);
+    }).toList();
+  }
 
   final List<String> bannerImagePaths = [
     'assets/images/banner1.png',
@@ -64,23 +46,18 @@ class _HomeScreenState extends State<HomeScreen> {
     'assets/images/banner3.png',
   ];
 
-  // --- MODIFIED METHOD ---
-  // The navigation logic is now handled here.
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Handle navigation based on the tapped item's index
     switch (index) {
       case 0:
-        // Already on home, do nothing or refresh
         break;
       case 1:
         Navigator.pushNamed(context, '/storePage');
         break;
       case 2:
-        // Navigate to the product page when cart is tapped
         Navigator.pushNamed(context, '/cartPage');
         break;
       case 3:
@@ -88,6 +65,15 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
     }
   }
+
+  // --- Search Handler ---
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+      // Rebuilding the widget tree will automatically use the filtered list
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -151,12 +137,12 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _buildImageCarousel(),
             const SizedBox(height: 24),
-            const Text(
-              'Quick Access',
-              style: TextStyle(
+            Text(
+              _searchQuery.isNotEmpty ? 'Search Results (${_filteredMedicines.length})' : 'Quick Access',
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color:AppColors.primaryButton,
+                color: Colors.black87,
               ),
             ),
             const SizedBox(height: 16),
@@ -169,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSearchBar() {
     return TextField(
+      onChanged: _onSearchChanged, // 🚀 KEY CHANGE: Add search handler
       decoration: InputDecoration(
         hintText: 'Search Medicines',
         prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -184,6 +171,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildImageCarousel() {
+    // Only show carousel if not actively searching
+    if (_searchQuery.isNotEmpty) {
+      return const SizedBox.shrink(); 
+    }
+
     return Column(
       children: [
         CarouselSlider.builder(
@@ -237,7 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: medicines.length,
+      // 🚀 KEY CHANGE: Use the filtered list here
+      itemCount: _filteredMedicines.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
@@ -245,13 +238,11 @@ class _HomeScreenState extends State<HomeScreen> {
         childAspectRatio: 0.8,
       ),
       itemBuilder: (context, index) {
-        return MedicineCard(medicine: medicines[index]);
+        return MedicineCard(medicine: _filteredMedicines[index]);
       },
     );
   }
 
-  // --- UPDATED WIDGET ---
-  // Uses `icon` for the default state and `activeIcon` for the selected state.
   BottomNavigationBar _buildBottomNavigationBar() {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
@@ -277,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ],
       currentIndex: _selectedIndex,
-      selectedItemColor: AppColors.primaryButton,
+      selectedItemColor: const Color.fromARGB(255, 22, 50, 98),
       unselectedItemColor: Colors.grey,
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
@@ -286,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// --- Medicine Card Widget (Unchanged) ---
+// --- Medicine Card Widget (Unchanged and kept for completeness) ---
 class MedicineCard extends StatelessWidget {
   final Medicine medicine;
 
@@ -297,11 +288,15 @@ class MedicineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This InkWell makes the card tappable
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
-        Navigator.pushNamed(context, '/productPage');
+        // --- KEY CHANGE: Pass the medicine object as an argument ---
+        Navigator.pushNamed(
+          context,
+          '/productPage',
+          arguments: medicine,
+        );
       },
       child: Container(
         decoration: BoxDecoration(

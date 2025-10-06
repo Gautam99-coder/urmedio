@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:dotted_border/dotted_border.dart';
+// import 'package:dotted_border/dotted_border.dart';
 import 'dart:io';
 
 class AddMedicineScreen extends StatefulWidget {
@@ -18,6 +18,8 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   bool _inStock = true;
+  // State variable to hold the selected image file
+  File? _selectedImageFile; 
 
   final picker = ImagePicker();
 
@@ -25,10 +27,11 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      // Navigate to the next page immediately after picking an image.
-      // The image file is not stored as state in this screen.
-      Navigator.pop(context); // Example: Redirects back to the previous screen.
-      // You could also use Navigator.pushReplacementNamed(context, '/home');
+      // *** FIX: Remove the problematic Navigator.pop(context) ***
+      // We now store the image in state so the user can continue filling the form.
+      setState(() {
+        _selectedImageFile = File(pickedFile.path);
+      });
     }
   }
 
@@ -40,6 +43,47 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
     _expiryDateController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  // --- Utility method to display the image or the placeholder ---
+  Widget _buildImageContent() {
+    if (_selectedImageFile != null) {
+      // Display the selected image using the exact container style
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          _selectedImageFile!,
+          fit: BoxFit.cover,
+          height: 200,
+          width: double.infinity,
+        ),
+      );
+    } else {
+      // Display the placeholder content
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text('Upload Medicine Image'),
+          const SizedBox(height: 5),
+          const Text(
+            'Tap to upload',
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _pickImage,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[200],
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+            child: const Text('Upload'),
+          ),
+        ],
+      );
+    }
   }
 
   @override
@@ -75,6 +119,7 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
+                  // Using DottedBorder is usually preferred, but keeping original solid border for no UI change
                   border: Border.all(
                     color: Colors.grey,
                     style: BorderStyle.solid,
@@ -82,29 +127,8 @@ class _AddMedicineScreenState extends State<AddMedicineScreen> {
                   ),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Upload Medicine Image'),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'Tap to upload',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[200],
-                        foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      child: const Text('Upload'),
-                    ),
-                  ],
-                ),
+                // *** Use the new builder method to handle content based on image state ***
+                child: _buildImageContent(),
               ),
             ),
             const SizedBox(height: 20),

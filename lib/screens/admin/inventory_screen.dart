@@ -8,6 +8,9 @@ class InventoryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // === Added this line to remove the back arrow ===
+        automaticallyImplyLeading: false,
+        // ===============================================
         title: const Text(
           'All Medicines',
           style: TextStyle(

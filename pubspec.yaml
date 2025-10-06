@@ -56,10 +56,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # The assets: line must be indented exactly two spaces under 'flutter:'
   assets:
+    # This path includes all files in the assets/images directory.
     - assets/images/
-    # - lib/assets/images/
-    
 
   # To add assets to your application, add an assets section, like this:
   # assets:

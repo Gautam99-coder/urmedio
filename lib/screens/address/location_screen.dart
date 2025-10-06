@@ -8,33 +8,47 @@ class LocationScreen extends StatelessWidget {
     const primaryBlue = Color.fromARGB(255, 20, 40, 95);
 
     return Scaffold(
+      // Setting the background color of the Scaffold to handle any gaps
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Placeholder for the Map Widget
-          // Positioned.fill(
-          //   child: Container(
-          //     color: Colors.grey[300],
-              
-          //     // In a real app, you would replace this with a map widget
-          //     child: Center(
-          //       child: Text(
-          //         'Map Placeholder',
-          //         style: TextStyle(
-          //           fontSize: 20,
-          //           color: Colors.grey[600],
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // Zoom and Location controls
-
+          // Map Placeholder (Positioned.fill)
           Positioned.fill(
-  child: Image.asset(
-    'assets/images/location.png', // Replace with the path to your static map image
-    fit: BoxFit.cover, // Ensures the image fills the entire area
-  ),
-),
+            child: Image.asset(
+              'assets/images/location.png', // Replace with the path to your static map image
+              fit: BoxFit.cover, // Ensures the image fills the entire area
+            ),
+          ),
+
+          // 🚀 BACK BUTTON (FIXED AND CLEAN)
+          Positioned(
+            top: 40, // Adjust this value for better placement relative to the status bar
+            left: 16,
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: () {
+                    Navigator.pop(context); // Go back to the previous screen
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          // Zoom and Location controls (Existing code)
           Positioned(
             bottom: MediaQuery.of(context).size.height * 0.45,
             right: 16.0,
@@ -69,7 +83,8 @@ class LocationScreen extends StatelessWidget {
               ],
             ),
           ),
-          // Draggable Bottom Sheet for pharmacy details
+
+          // Draggable Bottom Sheet for pharmacy details (Existing code)
           DraggableScrollableSheet(
             initialChildSize: 0.35, // Initial height of the sheet
             minChildSize: 0.35, // Minimum height when dragged down
@@ -122,8 +137,13 @@ class LocationScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Pharmacy card list
+                        // Pharmacy card list (Repeating this for scrollability)
                         _buildPharmacyCard(context),
+                        _buildPharmacyCard(context),
+                        _buildPharmacyCard(context),
+                        _buildPharmacyCard(context),
+                        _buildPharmacyCard(context),
+                        const SizedBox(height: 20), // Padding at the bottom
                       ],
                     ),
                   ),

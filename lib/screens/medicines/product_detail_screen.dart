@@ -1,45 +1,55 @@
 import 'package:flutter/material.dart';
-import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/bottom_navbar.dart'; // Import the custom BottomNavBar widget
+import 'package:urmedio/widgets/medicine_card.dart';
+// Assuming this path contains the Medicine model and allMedicines list
 
-class MedicineDetailsScreen extends StatelessWidget {
-  const MedicineDetailsScreen({super.key});
+// Assuming this import is correct based on your file structure
+// import 'package:urmedio/widgets/medicine_card.dart'; 
+
+class ProductDetailScreen extends StatelessWidget {
+  // --- KEY CHANGE: Accept a Medicine object ---
+  final Medicine medicine;
+
+  const ProductDetailScreen({super.key, required this.medicine});
 
   /// Builds the main product image container
   Widget _buildImageCard() {
+    // Cleaned up the formatting to eliminate any invisible/illegal characters
     return Container(
       height: 300,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFFDEEE5),
+        // Use the background color from the medicine object for consistency
+        color: medicine.backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Image.asset('assets/images/bigmed1.png', fit: BoxFit.contain),
+        // Use the large image path from the medicine object
+        child: Image.asset(medicine.bigImagePath, fit: BoxFit.contain),
       ),
     );
   }
 
-  /// Builds the name and description section
+  /// Builds the name and description section (Dynamically populated)
   Widget _buildMedicineInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Aspirin 500mg',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        Text(
+          medicine.name, // Dynamic name
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
-          'Aspirin is a common pain reliever and fever reducer. It\'s also used to prevent blood clots, reducing the risk of heart attacks and strokes.',
+          medicine.description, // Dynamic description
           style: TextStyle(fontSize: 15, color: Colors.grey[700], height: 1.5),
         ),
       ],
     );
   }
 
-  /// Builds the entire rating section with score and progress bars
+  /// Builds the entire rating section with score and progress bars (Static for now)
   Widget _buildRatingSection() {
     return Row(
       children: [
@@ -120,19 +130,19 @@ class MedicineDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the price display
+  /// Builds the price display (Dynamically populated)
   Widget _buildPriceSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
+      children: [
+        const Text(
           'Price',
           style: TextStyle(fontSize: 16, color: Colors.grey),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
-          'Rs 259',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          'Rs ${medicine.price.toStringAsFixed(2)}', // Dynamic price
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -166,7 +176,8 @@ class MedicineDetailsScreen extends StatelessWidget {
   }
 
   /// Helper for a single pharmacy list item
-  Widget _buildPharmacyTile(String name, String distance, String imagePath, BuildContext context) {
+  Widget _buildPharmacyTile(
+      String name, String distance, String imagePath, BuildContext context) {
     return Row(
       children: [
         Image.asset(imagePath, width: 50, height: 50),
@@ -206,16 +217,17 @@ class MedicineDetailsScreen extends StatelessWidget {
             side: BorderSide(color: Colors.grey.shade300),
           ),
           child: const Icon(Icons.add_shopping_cart_outlined,
-              color: AppColors.primaryButton),
+              color: Color.fromARGB(255, 25, 59, 88)),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              Navigator.pushNamed(context, "/checkoutPage");
+              Navigator.pushNamed(context, '/checkoutPage');
+              // Action for Buy Now
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryButton,
+              backgroundColor: const Color.fromARGB(255, 22, 64, 99),
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
@@ -231,8 +243,8 @@ class MedicineDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the horizontal list of similar medicines
-  Widget _buildSimilarMedicines() {
+  /// Builds the horizontal list of similar medicines (Dynamic)
+  Widget _buildSimilarMedicines(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -246,56 +258,62 @@ class MedicineDetailsScreen extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            children: [
-              _buildSimilarMedicineCard(
-                'Strong Pain Relief',
-                '200mg | 10 tablets',
-                'assets/images/med1.png',
-              ),
-              _buildSimilarMedicineCard(
-                'Pain Relief Tablets',
-                '100mg | 20 tablets',
-                'assets/images/midmed2.png',
-              ),
-              _buildSimilarMedicineCard(
-                'Aspirin 50mg',
-                '50mg | 30 tablets',
-                'assets/images/midmed1.png',
-              ),
-            ],
+            // Map over the similar medicines and pass the full object to the card builder
+            children: allMedicines
+                .where((med) => med.name != medicine.name)
+                .take(3)
+                .map((med) => _buildSimilarMedicineCard(
+                      med, // Pass the full Medicine object
+                      context, // Pass context for navigation
+                    ))
+                .toList(),
           ),
         )
       ],
     );
   }
 
-  /// Helper for a single "similar medicine" card
+  /// Helper for a single "similar medicine" card (Modified to handle navigation)
   Widget _buildSimilarMedicineCard(
-      String name, String details, String imagePath) {
-    return Container(
-      width: 140,
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 120,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF9E3E3),
-              borderRadius: BorderRadius.circular(16),
+      Medicine similarMedicine, BuildContext context) {
+    return InkWell(
+      onTap: () {
+        // Navigate to the same product page, passing the new medicine object
+        Navigator.pushNamed(
+          context,
+          '/productPage',
+          arguments: similarMedicine,
+        );
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: 140,
+        margin: const EdgeInsets.only(right: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 120,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                // Use the similar medicine's background color
+                color: similarMedicine.backgroundColor.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Image.asset(similarMedicine.imagePath, height: 100)), // Use the similar medicine's image
             ),
-            child: Center(child: Image.asset(imagePath, height: 100)),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          Text(details, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              similarMedicine.name, // Dynamic name
+              style: const TextStyle(fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(similarMedicine.type, // Dynamic type (used as details)
+                style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }
@@ -310,9 +328,9 @@ class MedicineDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text(
-          'Medicine Details',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        title: Text(
+          medicine.name, // Dynamic title
+          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -334,7 +352,7 @@ class MedicineDetailsScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildActionButtons(context),
               const SizedBox(height: 32),
-              _buildSimilarMedicines(),
+              _buildSimilarMedicines(context), // Pass context
               const SizedBox(height: 20),
             ],
           ),

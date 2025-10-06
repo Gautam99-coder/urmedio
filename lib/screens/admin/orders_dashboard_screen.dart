@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:urmedio/widgets/pbottom_navbar.dart'; // Make sure this path is correct
 
+// A simple model class for an Order item
+class OrderItemData {
+  final String patientName;
+  final String medicineName;
+  final String orderId;
+  final String status;
+  final Color statusColor;
+  final String imagePath;
+
+  OrderItemData({
+    required this.patientName,
+    required this.medicineName,
+    required this.orderId,
+    required this.status,
+    required this.statusColor,
+    required this.imagePath,
+  });
+}
+
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({Key? key}) : super(key: key);
 
@@ -9,37 +28,81 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  int _selectedIndex = 1; // Assuming 'Orders' is the second item (index 1)
+  int _selectedIndex = 1;
+  // 1. State variable for the selected filter (default is 'All Orders')
+  String _selectedFilter = 'All Orders';
+  final List<String> _filterOptions = [
+    'All Orders',
+    'Pending',
+    'Delivered',
+    'Shipped',
+    'Cancelled'
+  ];
+
+  // Hardcoded list of all orders (from your original _buildOrderItem calls)
+  final List<OrderItemData> _allOrders = [
+    OrderItemData(
+      patientName: 'Alisha Patel',
+      medicineName: 'Paracetamol,Ethanol',
+      orderId: '#12345',
+      status: 'Pending',
+      statusColor: Colors.red,
+      imagePath: 'assets/images/p1.png',
+    ),
+    OrderItemData(
+      patientName: 'Gautam Tharu',
+      medicineName: 'Ibuprofen',
+      orderId: '#67890',
+      status: 'Delivered',
+      statusColor: Colors.green,
+      imagePath: 'assets/images/p2.png',
+    ),
+    OrderItemData(
+      patientName: 'Black Widow',
+      medicineName: 'Cetirizine',
+      orderId: '#11223',
+      status: 'Shipped',
+      statusColor: Colors.blue,
+      imagePath: 'assets/images/p3.png',
+    ),
+    OrderItemData(
+      patientName: 'Super Nova',
+      medicineName: 'Antacid',
+      orderId: '#44556',
+      status: 'Cancelled',
+      statusColor: Colors.red,
+      imagePath: 'assets/images/p4.png',
+    ),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-    // Add your navigation logic here based on the index
-    // For example:
-    // if (index == 0) {
-    //   Navigator.pushReplacementNamed(context, '/home');
-    // }
-    // else if (index == 2) {
-    //   Navigator.pushReplacementNamed(context, '/products');
-    // }
-    // else if (index == 3) {
-    //   Navigator.pushReplacementNamed(context, '/profile');
-    // }
+  }
+
+  // 2. Filter logic function
+  List<OrderItemData> _getFilteredOrders() {
+    if (_selectedFilter == 'All Orders') {
+      return _allOrders;
+    } else {
+      return _allOrders
+          .where((order) => order.status == _selectedFilter)
+          .toList();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Get the list of orders to display based on the current filter
+    final filteredOrders = _getFilteredOrders();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+        automaticallyImplyLeading: false, 
+        
         title: const Text(
           'Orders',
           style: TextStyle(
@@ -63,19 +126,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               children: [
                 _buildSummaryCard(
                   title: 'Total Orders',
-                  count: 120,
+                  count: _allOrders.length, // Dynamic total count
                   imagePath: 'assets/images/totalorder.jpg',
                 ),
                 const SizedBox(width: 10),
                 _buildSummaryCard(
                   title: 'Pending Orders',
-                  count: 30,
+                  count: _allOrders.where((o) => o.status == 'Pending').length, // Dynamic pending count
                   imagePath: 'assets/images/panding1.png',
                 ),
                 const SizedBox(width: 10),
                 _buildSummaryCard(
                   title: 'Delivered',
-                  count: 90,
+                  count: _allOrders.where((o) => o.status == 'Delivered').length, // Dynamic delivered count
                   imagePath: 'assets/images/delivered.png',
                 ),
               ],
@@ -87,58 +150,64 @@ class _OrdersScreenState extends State<OrdersScreen> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            // Filter Dropdown
+            // *** Filter Dropdown Widget (Replaced the static Container) ***
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('All Orders', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Icon(Icons.arrow_drop_down),
-                ],
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedFilter,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  items: _filterOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedFilter = newValue;
+                      });
+                    }
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            // Orders List
-            _buildOrderItem(
-              'Alisha Patel',
-              'Paracetamol,Ethanol',
-              '#12345',
-              'Pending',
-              Colors.red,
-              'assets/images/p1.png',
-            ),
-            const SizedBox(height: 10),
-            _buildOrderItem(
-              'Gautam Tharu',
-              'Ibuprofen',
-              '#67890',
-              'Delivered',
-              Colors.green,
-              'assets/images/p2.png',
-            ),
-            const SizedBox(height: 10),
-            _buildOrderItem(
-              'Black Widow',
-              'Cetirizine',
-              '#11223',
-              'Shipped',
-              Colors.blue,
-              'assets/images/p3.png',
-            ),
-            const SizedBox(height: 10),
-            _buildOrderItem(
-              'Super Nova',
-              'Antacid',
-              '#44556',
-              'Cancelled',
-              Colors.red,
-              'assets/images/p4.png',
-            ),
+            // *** Orders List (Now built dynamically using map and spread operator) ***
+            if (filteredOrders.isEmpty)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 50.0),
+                  child: Text(
+                    'No orders match the current filter.',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ),
+              )
+            else
+              ...filteredOrders.map((order) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10.0),
+                  child: _buildOrderItem(
+                    order.patientName,
+                    order.medicineName,
+                    order.orderId,
+                    order.status,
+                    order.statusColor,
+                    order.imagePath,
+                  ),
+                );
+              }).toList(),
           ],
         ),
       ),
@@ -165,20 +234,21 @@ class _OrdersScreenState extends State<OrdersScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // You might want to adjust the height/fit of images here based on your actual assets
               Image.asset(
                 imagePath,
-                height: 80,
+                height: 50, // Reduced height for better card fit
                 fit: BoxFit.contain,
               ),
               const SizedBox(height: 10),
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
               const SizedBox(height: 5),
               Text(
                 count.toString(),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ],
           ),
