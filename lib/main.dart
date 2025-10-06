@@ -21,7 +21,7 @@ import 'package:urmedio/screens/contact_us_screen.dart';
 import 'package:urmedio/screens/faq_screen.dart';
 import 'package:urmedio/screens/home/home_screen.dart';
 import 'package:urmedio/screens/home/phome_screen.dart';
-import 'package:urmedio/screens/medicines/order_summary_screen.dart';
+import 'package:urmedio/screens/medicines/my_order_screen.dart';
 
 // --- KEY ADDITION 1: Import the ProductDetailScreen to use the correct name
 import 'package:urmedio/screens/medicines/product_detail_screen.dart'; 
@@ -29,7 +29,6 @@ import 'package:urmedio/screens/medicines/storePage_screen.dart';
 import 'package:urmedio/screens/privacy_policy_screen.dart';
 import 'package:urmedio/screens/profile/aprofile_screen.dart';
 import 'package:urmedio/screens/profile/edit_profile_screen.dart';
-import 'package:urmedio/screens/profile/my_order_screen.dart';
 import 'package:urmedio/screens/profile/profile_screen.dart';
 import 'package:urmedio/screens/save_address_screen.dart';
 import 'package:urmedio/screens/term_of_services_screen.dart';
@@ -91,7 +90,6 @@ class UrMedioApp extends StatelessWidget {
         '/checkoutPage': (context) => const CheckoutScreen(),
         '/confmPage': (context) => const OrderConfirmationScreen(),
         '/myorder': (context) => const MyOrdersScreen(),
-        '/ordreciv': (context) => const OrderSummaryScreen(),
         '/editPro': (context) => const EditProfileScreen(),
         '/saveAdd': (context) => const SavedAddressesScreen(),
         '/addNewAdd': (context) => const AddNewAddressScreen(),
