@@ -93,6 +93,7 @@ class UrMedioApp extends StatelessWidget {
        '/faq':(context)=> const FaqScreen(),
        '/tos':(context)=> const TermsOfServiceScreen(),
        '/pp':(context)=> const PrivacyPolicyScreen(),
+        //updating
 
 
       },
