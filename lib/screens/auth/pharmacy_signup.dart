@@ -116,7 +116,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
           SizedBox.expand(

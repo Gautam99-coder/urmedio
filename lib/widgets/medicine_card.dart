@@ -44,6 +44,18 @@ final List<Medicine> allMedicines = [
     price: 150.00,
     bigImagePath: 'assets/images/med2.png',
   ),
+
+Medicine(
+    name: 'Cetirizine 10mg',
+    type: 'Antihistamine',
+    imagePath: 'assets/images/avater2.jpeg',
+    backgroundColor: const Color(0xFFFFF2E8),
+    description:
+        'Cetirizine is a non-drowsy antihistamine that is used to relieve the symptoms of hay fever and other allergies, such as sneezing, runny nose, and watery eyes.',
+    price: 150.00,
+    bigImagePath: 'assets/images/avater2.jpeg',
+  ),
+
   Medicine(
     name: 'Ibuprofen 400mg',
     type: 'Painkiller',

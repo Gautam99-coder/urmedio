@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:urmedio/screens/address/addnewaddress_screen.dart';
+
 import 'package:urmedio/screens/address/location_screen.dart';
+import 'package:urmedio/screens/address/paddress_screen.dart';
 import 'package:urmedio/screens/admin/add_medicine_screen.dart';
-import 'package:urmedio/screens/admin/address_screen.dart';
 import 'package:urmedio/screens/admin/earnings_screen.dart';
 import 'package:urmedio/screens/admin/inventory_screen.dart';
 import 'package:urmedio/screens/admin/orders_dashboard_screen.dart';
-import 'package:urmedio/screens/admin/pedit_profile_screen.dart';
 import 'package:urmedio/screens/admin/updatastock_screen.dart';
 import 'package:urmedio/screens/auth/forgetpassword_screen.dart';
 import 'package:urmedio/screens/auth/otp_screen.dart';
@@ -29,6 +29,7 @@ import 'package:urmedio/screens/medicines/storePage_screen.dart';
 import 'package:urmedio/screens/privacy_policy_screen.dart';
 import 'package:urmedio/screens/profile/aprofile_screen.dart';
 import 'package:urmedio/screens/profile/edit_profile_screen.dart';
+import 'package:urmedio/screens/profile/pedit_profile_screen.dart';
 import 'package:urmedio/screens/profile/profile_screen.dart';
 import 'package:urmedio/screens/save_address_screen.dart';
 import 'package:urmedio/screens/term_of_services_screen.dart';
@@ -106,7 +107,6 @@ class UrMedioApp extends StatelessWidget {
         
         // Corrected the route for OrdersScreen (imported as OrdersScreen)
         '/orderSrc': (context) => const OrdersScreen(),
-        
         '/inventry': (context) => const InventoryScreen(),
         '/aprofile': (context) => const AprofileScreen(),
         '/aeditp': (context) => const PeditProfileScreen(),
@@ -116,6 +116,8 @@ class UrMedioApp extends StatelessWidget {
         '/faq': (context) => const FaqScreen(),
         '/tos': (context) => const TermsOfServiceScreen(),
         '/pp': (context) => const PrivacyPolicyScreen(),
+        '/splash': (context) => const SplashScreen(),
+
       },
     );
   }

@@ -135,7 +135,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back, size: 28),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pushNamed(context, '/splash'),
                     ),
                     const SizedBox(height: 40),
                     const Text(

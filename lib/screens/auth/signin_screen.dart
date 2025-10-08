@@ -126,7 +126,7 @@ class _SigninScreenState extends State<SigninScreen> {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back, size: 28),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => Navigator.pushNamed(context, '/signup'),
                     ),
                     const SizedBox(height: 60),
                     const Text(
