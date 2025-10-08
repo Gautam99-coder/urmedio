@@ -1,16 +1,68 @@
-import 'package:flutter/material.dart';
-import 'package:urmedio/widgets/pbottom_navbar.dart'; // Import your existing bottom navigation bar file
+// inventory_screen.dart
 
-class InventoryScreen extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:urmedio/widgets/pbottom_navbar.dart';
+import 'package:urmedio/models/medicine_data.dart'; // Import the service
+
+class InventoryScreen extends StatefulWidget {
   const InventoryScreen({super.key});
 
   @override
+  State<InventoryScreen> createState() => _InventoryScreenState();
+}
+
+class _InventoryScreenState extends State<InventoryScreen> {
+  late MedicineDataService _service;
+
+  @override
+  void initState() {
+    super.initState();
+    _service = medicineDataService;
+    _service.addListener(_onMedicineDataChanged);
+  }
+
+  @override
+  void dispose() {
+    _service.removeListener(_onMedicineDataChanged);
+    super.dispose();
+  }
+
+  void _onMedicineDataChanged() {
+    // Rebuild the screen when the medicine data changes
+    setState(() {});
+  }
+
+  // Helper function to group medicines by category
+  Map<String, List<Medicine>> _groupMedicinesByCategory() {
+    final Map<String, List<Medicine>> grouped = {};
+    for (var medicine in _service.medicines) {
+      if (!grouped.containsKey(medicine.category)) {
+        grouped[medicine.category] = [];
+      }
+      grouped[medicine.category]!.add(medicine);
+    }
+    return grouped;
+  }
+
+  // Dummy colors for MedicineCard backgrounds
+  static const List<Color> _cardColors = [
+    Color(0xFFF0F5EE), // Light Green
+    Color(0xFFF9E8DB), // Light Orange
+    Color(0xFFE3F2FD), // Light Blue
+    Color(0xFFF3E5F5), // Light Purple
+  ];
+
+  Color _getColorForIndex(int index) {
+    return _cardColors[index % _cardColors.length];
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final groupedMedicines = _groupMedicinesByCategory();
+
     return Scaffold(
       appBar: AppBar(
-        // === Added this line to remove the back arrow ===
         automaticallyImplyLeading: false,
-        // ===============================================
         title: const Text(
           'All Medicines',
           style: TextStyle(
@@ -49,130 +101,74 @@ class InventoryScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-              const Text(
-                'Painkillers',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              if (groupedMedicines.isEmpty)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 50.0),
+                    child: Text(
+                      'No medicines in inventory. Tap "Add Medicine" to start.',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 200,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: const [
-                    MedicineCard(
-                      title: 'Ibuprofen',
-                      subtitle: '200mg, Generic',
-                      color: Color(0xFFF0F5EE),
-                      imagePath: 'assets/images/imed1.png',
+
+              ...groupedMedicines.entries.toList().asMap().entries.map((entry) {
+                int categoryIndex = entry.key;
+                String category = entry.value.key;
+                List<Medicine> medicines = entry.value.value;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    MedicineCard(
-                      title: 'Acetaminophen',
-                      subtitle: '500mg, Tylenol',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed2.png',
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: medicines.length,
+                        itemBuilder: (context, index) {
+                          final medicine = medicines[index];
+                          return MedicineCard(
+                            title: medicine.name,
+                            subtitle: medicine.details,
+                            color: _getColorForIndex(categoryIndex + index), // Vary colors
+                            imagePath: medicine.imagePath,
+                          );
+                        },
+                      ),
                     ),
-                    MedicineCard(
-                      title: 'Naproxen',
-                      subtitle: '250mg, Naprosyn',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed7.png',
+                    TextButton(
+                      onPressed: () {
+                        // TODO: Implement navigation to a screen showing all medicines in this category
+                      },
+                      child: const Text('View All'),
                     ),
+                    const SizedBox(height: 16),
                   ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text('View All'),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Antibiotics',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 200,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: const [
-                    MedicineCard(
-                      title: 'Amoxicillin',
-                      subtitle: '500mg, Amoxil',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed4.png',
-                    ),
-                    MedicineCard(
-                      title: 'Azithromycin',
-                      subtitle: '250mg, Zithromax',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed5.png',
-                    ),
-                    MedicineCard(
-                      title: 'Ciprofloxacin',
-                      subtitle: '500mg, Cipro',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed2.png',
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text('View All'),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Vitamins',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 200,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: const [
-                    MedicineCard(
-                      title: 'Vitamin D',
-                      subtitle: '1000IU, D-Vite',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed1.png',
-                    ),
-                    MedicineCard(
-                      title: 'Vitamin C',
-                      subtitle: '500mg, C-Plus',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed4.png',
-                    ),
-                    MedicineCard(
-                      title: 'Multivitamin',
-                      subtitle: 'Daily, Multivitamin',
-                      color: Color(0xFFF9E8DB),
-                      imagePath: 'assets/images/imed7.png',
-                    ),
-                  ],
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: const Text('View All'),
-              ),
+                );
+              }),
               const SizedBox(height: 100),
             ],
           ),
         ),
       ),
+      // NOTE: You'll need to define selectedIndex for the InventoryScreen in your main file
+      // I've hardcoded a placeholder for now.
       bottomNavigationBar: PBottomNavBar(
-        selectedIndex: 0,
-        onItemTapped: (int index) {},
+        selectedIndex: 1, // Assuming Inventory is the second item (index 1)
+        onItemTapped: (int index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/home'); // Navigate back to home
+          }
+          // The other navigation logic is usually handled in the main routes setup.
+        },
       ),
     );
   }
@@ -205,14 +201,19 @@ class MedicineCard extends StatelessWidget {
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center, // Center items vertically
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center( // Center the image horizontally
+            Center(
               child: Image.asset(
                 imagePath,
                 width: 80,
                 height: 80,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox(
+                  width: 80,
+                  height: 80,
+                  child: Icon(Icons.medication_liquid_outlined, size: 50, color: Colors.grey),
+                ),
               ),
             ),
             const Spacer(),
