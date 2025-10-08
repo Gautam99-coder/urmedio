@@ -41,9 +41,6 @@ import 'screens/splash_screen.dart';
 import 'screens/onboarding1.dart';
 import 'screens/onboarding2.dart';
 
-// --- KEY ADDITION 2: Import the Medicine model from the home screen
-// This makes the 'Medicine' type available for the route definition. // Assumes you have a data file here, adjust path if needed
-
 void main() {
   runApp(const UrMedioApp());
 }
