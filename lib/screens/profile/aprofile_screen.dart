@@ -48,7 +48,7 @@ class _AprofileScreenState extends State<AprofileScreen> {
             const CircleAvatar(
               radius: 50,
               // Uses the new image path you provided
-              backgroundImage: AssetImage('assets/images/avatar.jpeg'),
+              backgroundImage: AssetImage('assets/images/avater2.jpeg'),
             ),
             const SizedBox(height: 12),
             // User Name

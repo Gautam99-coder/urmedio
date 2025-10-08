@@ -147,14 +147,14 @@ class ProfileScreen extends StatelessWidget {
                 icon: Icons.help_outline,
                 title: 'Help & Support',
                 onTap: () {
-                  Navigator.pushNamed(context, '/helpAndSupport');
+                  Navigator.pushNamed(context, '/contactUs');
                 },
               ),
               _buildProfileOption(
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy & Terms',
                 onTap: () {
-                  Navigator.pushNamed(context, '/privacyAndTerms');
+                  Navigator.pushNamed(context, '/pp');
                 },
               ),
               _buildProfileOption(
