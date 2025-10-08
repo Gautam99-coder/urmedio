@@ -1,5 +1,10 @@
+// phome_screen.dart
+
 import 'package:flutter/material.dart';
-import 'package:urmedio/widgets/pbottom_navbar.dart'; // Make sure this path is correct
+import 'package:urmedio/models/medicine_data.dart';
+import 'package:urmedio/widgets/medicine_item.dart';
+import 'package:urmedio/widgets/pbottom_navbar.dart';
+// ... other imports ...
 
 class PhomeScreen extends StatefulWidget {
   const PhomeScreen({Key? key}) : super(key: key);
@@ -10,11 +15,93 @@ class PhomeScreen extends StatefulWidget {
 
 class _PhomeScreenState extends State<PhomeScreen> {
   int _selectedIndex = 0;
+  String _currentFilter = 'All'; // Filter state: 'All', 'In Stock', 'Low Stock', 'Out of Stock'
+  String _searchQuery = ''; // Search state
+
+  late MedicineDataService _service;
+
+  @override
+  void initState() {
+    super.initState();
+    _service = medicineDataService; // Get the global instance
+    _service.addListener(_onMedicineDataChanged);
+  }
+
+  @override
+  void dispose() {
+    _service.removeListener(_onMedicineDataChanged);
+    super.dispose();
+  }
+
+  void _onMedicineDataChanged() {
+    // This forces a rebuild whenever the medicine list changes in the service
+    setState(() {});
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    // Navigate based on index (assuming 0 is Home, 1 is Inventory)
+    if (index == 1) {
+      Navigator.pushNamed(context, '/inventory');
+    }
+  }
+
+  List<Medicine> get _filteredMedicines {
+    List<Medicine> list = _service.medicines;
+
+    // 1. Filter by Stock Status
+    if (_currentFilter != 'All') {
+      list = list.where((m) => m.status == _currentFilter).toList();
+    }
+
+    // 2. Filter by Search Query
+    if (_searchQuery.isNotEmpty) {
+      list = list.where((m) =>
+          m.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          m.details.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+    }
+
+    return list;
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // --- Callbacks for MedicineItem ---
+  void _onDeleteMedicine(String id) {
+    _service.deleteMedicine(id);
+    _showSnackbar('Medicine successfully deleted! 🗑️');
+  }
+
+  void _onEditMedicine(String id) {
+    // Navigate to a dedicated update screen or use the AddMedicineScreen for editing
+    Navigator.pushNamed(context, '/updatestock', arguments: id);
+  }
+
+  void _onCountUpdate(String id, int newCount) {
+    // This logic is usually for sales/cart. For now, it just updates the internal state of MedicineItem.
+    // If you need to update the actual stock, the user should use the 'Edit' button.
+  }
+  // -----------------------------------
+
+  // 🚀 Helper to generate the correct display text
+  String get _inventoryHeaderText {
+    final count = _filteredMedicines.length;
+    
+    if (_currentFilter == 'All') {
+      return 'Inventory (All | $count)';
+    } else {
+      // Shorter text when a filter is active to avoid overflow
+      return '$_currentFilter | $count';
+    }
   }
 
   @override
@@ -26,7 +113,7 @@ class _PhomeScreenState extends State<PhomeScreen> {
         leading: const Padding(
           padding: EdgeInsets.all(8.0),
           child: CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile1.png'),
+            backgroundImage: AssetImage('assets/images/avater2.jpeg'),
           ),
         ),
         title: const Text(
@@ -36,35 +123,39 @@ class _PhomeScreenState extends State<PhomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-actions: [
-  IconButton(
-    icon: const Icon(Icons.settings_outlined, color: Colors.black),
-    onPressed: () {
-      // This line triggers the navigation to the '/settings' route
-      Navigator.pushNamed(context, '/settingScr');
-    },
-  ),
-  const SizedBox(width: 10),
-],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined, color: Colors.black),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settingScr');
+            },
+          ),
+          const SizedBox(width: 10),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Stock Summary Cards
+            // --- Stock Summary Cards (Filters) ---
             Row(
               children: [
-                _buildStockCard('In Stock', 120, Colors.blue),
+                _buildStockCard('In Stock', _service.inStockCount, 'In Stock', Colors.blue),
                 const SizedBox(width: 10),
-                _buildStockCard('Low Stock', 30, Colors.blue.shade300),
+                _buildStockCard('Low Stock', _service.lowStockCount, 'Low Stock', Colors.blue.shade300!),
                 const SizedBox(width: 10),
-                _buildStockCard('Out of Stock', 10, Colors.blue.shade300),
+                _buildStockCard('Out of Stock', _service.outOfStockCount, 'Out of Stock', Colors.blue.shade300!),
               ],
             ),
             const SizedBox(height: 20),
-            // Search Bar
+            // --- Search Bar ---
             TextField(
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.search),
                 hintText: 'Search medicines...',
@@ -74,20 +165,36 @@ actions: [
                 ),
                 filled: true,
                 fillColor: Colors.grey[200],
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          setState(() {
+                            _searchQuery = '';
+                          });
+                        },
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 20),
-            // Inventory Section
+            // --- Inventory Section Header ---
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Inventory',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    // 🚀 USE THE SHORTER HEADER TEXT
+                    _inventoryHeaderText,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1, 
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushNamed(context, '/addMedicine');
@@ -106,38 +213,29 @@ actions: [
               ],
             ),
             const SizedBox(height: 10),
-            // Analytics Button
-            
-            // Medicine List
-            const MedicineItem(
-              status: 'In Stock',
-              medicineName: 'Paracetamol',
-              details: 'Acetaminophen • 500mg • GSK',
-              price: 150,
-              quantity: 100,
-              initialCount: 7,
-              imagePath: 'assets/images/pmed.png',
-            ),
-            const SizedBox(height: 10),
-            const MedicineItem(
-              status: 'Low Stock',
-              medicineName: 'Ibuprofen',
-              details: 'Ibuprofen • 200mg • Pfizer',
-              price: 120,
-              quantity: 20,
-              initialCount: 2,
-              imagePath: 'assets/images/pmed1.png', 
-            ),
-            const SizedBox(height: 10),
-            const MedicineItem(
-              status: 'Out of Stock',
-              medicineName: 'Amoxicillin',
-              details: 'Amoxicillin • 250mg • Cipla',
-              price: 80,
-              quantity: 0,
-              initialCount: 0,
-              imagePath: 'assets/images/pmed2.png',
-            ),
+            // --- Medicine List ---
+            ..._filteredMedicines.map((medicine) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: MedicineItem(
+                    medicine: medicine,
+                    onDelete: _onDeleteMedicine,
+                    onEdit: _onEditMedicine,
+                    onCountUpdate: _onCountUpdate,
+                  ),
+                )).toList(),
+
+            if (_filteredMedicines.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 50.0),
+                child: Center(
+                  child: Text(
+                    _searchQuery.isNotEmpty
+                        ? 'No medicine found for "$_searchQuery".'
+                        : 'No medicines match the selected filter.',
+                    style: const TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -148,199 +246,74 @@ actions: [
     );
   }
 
-  Widget _buildStockCard(String title, int count, Color color) {
+  // --- _buildStockCard method ---
+  Widget _buildStockCard(String title, int count, String filterValue, Color originalColor) {
+    // Check if the current filter is active. We treat 'In Stock' as the 'All' state 
+    // when displaying the count for the first card to mimic the original look.
+    final isActiveFilter = _currentFilter == filterValue;
+    
+    // Determine the background color
+    Color cardColor;
+    if (_currentFilter == 'All') {
+        // If 'All' is selected, use the original colors.
+        cardColor = originalColor;
+    } else {
+        // If a specific filter is selected:
+        if (isActiveFilter) {
+            // Use a slightly darker shade for the active card.
+            cardColor = originalColor == Colors.blue 
+                ? const Color(0xFF0D47A1) // Darker Blue for active 'In Stock'
+                : originalColor.withOpacity(1.0); // Maintain original shade for Low/Out
+        } else {
+            // Fade the inactive cards (light grey overlay)
+            cardColor = originalColor.withOpacity(0.4); 
+        }
+    }
+
+    // Determine the border for the active filter
+    final borderStyle = isActiveFilter
+        ? Border.all(color: Colors.white, width: 3) // Use a white border for contrast
+        : null;
+
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            // Toggle logic: tapping the active filter returns to 'All'
+            _currentFilter = isActiveFilter ? 'All' : filterValue;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(15),
+            border: borderStyle,
+            boxShadow: isActiveFilter 
+                ? [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 5)]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              count.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 5),
+              Text(
+                count.toString(),
+                style: const TextStyle(
+                  color: Colors.white, 
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MedicineItem extends StatefulWidget {
-  final String status;
-  final String medicineName;
-  final String details;
-  final int price;
-  final int quantity;
-  final int initialCount;
-  final String imagePath;
-
-  const MedicineItem({
-    Key? key,
-    required this.status,
-    required this.medicineName,
-    required this.details,
-    required this.price,
-    required this.quantity,
-    required this.initialCount,
-    required this.imagePath,
-  }) : super(key: key);
-
-  @override
-  _MedicineItemState createState() => _MedicineItemState();
-}
-
-class _MedicineItemState extends State<MedicineItem> {
-  late int _count;
-
-  @override
-  void initState() {
-    super.initState();
-    _count = widget.initialCount;
-  }
-
-  void _increment() {
-    setState(() {
-      _count++;
-    });
-  }
-
-  void _decrement() {
-    setState(() {
-      if (_count > 0) {
-        _count--;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.status,
-                        style: TextStyle(
-                          color: widget.status == 'In Stock'
-                              ? Colors.green
-                              : widget.status == 'Low Stock'
-                                  ? Colors.orange
-                                  : Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        widget.medicineName,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.details,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        '₹ ${widget.price}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.grey[200],
-                    image: DecorationImage(
-                      image: AssetImage(widget.imagePath),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Quantity: ${widget.quantity}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit, size: 20),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/updatestock');
-                      },
-                    ),
-                    const Text('Edit'),
-                    const SizedBox(width: 10),
-                    IconButton(
-                      icon: const Icon(Icons.delete, size: 20),
-                      onPressed: () {},
-                    ),
-                    const Text('Delete'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove_circle_outline),
-                      onPressed: _decrement,
-                    ),
-                    Text(
-                      _count.toString(),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add_circle_outline),
-                      onPressed: _increment,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
