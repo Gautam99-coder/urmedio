@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class Medicine {
   final String name;
   final String type;
