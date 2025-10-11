@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       title: const Text(
-        'Mr.RAM\n360020.Rajkot extension',
+        'Mr.Ram Prakash Kurmi\n360020.Rajkot extension',
         style: TextStyle(
           color: Colors.black87,
           fontWeight: FontWeight.bold,
@@ -111,7 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: IconButton(
             icon: const Icon(Icons.call, color: Colors.white, size: 20),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/call');
+            },
           ),
         ),
         IconButton(

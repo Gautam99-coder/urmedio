@@ -35,6 +35,7 @@ import 'package:urmedio/screens/save_address_screen.dart';
 import 'package:urmedio/screens/term_of_services_screen.dart';
 import 'package:urmedio/screens/view/notification_screen.dart';
 import 'package:urmedio/screens/view/pharmacydetail_screen.dart';
+import 'package:urmedio/services/call_screen.dart';
 import 'package:urmedio/widgets/medicine_card.dart';
 import 'package:urmedio/widgets/setting_screen.dart';
 import 'screens/splash_screen.dart';
@@ -114,6 +115,7 @@ class UrMedioApp extends StatelessWidget {
         '/tos': (context) => const TermsOfServiceScreen(),
         '/pp': (context) => const PrivacyPolicyScreen(),
         '/splash': (context) => const SplashScreen(),
+        '/call': (context) => const CallScreen(),
 
       },
     );

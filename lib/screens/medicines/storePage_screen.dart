@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/bottom_navbar.dart'; // Import your custom BottomNavBar widget
 // You MUST ensure these two imports are correct for the code to run:
 //import '../home/medicine_data.dart'; // Contains Medicine class and allMedicines list
@@ -86,7 +87,7 @@ class StoreMedicineCard extends StatelessWidget {
                   Text(
                     'Rs. ${medicine.price.toStringAsFixed(2)}', // Dynamic price
                     style: const TextStyle(
-                      color: Color.fromARGB(255, 22, 64, 99), // Adjusted to match your primary blue
+                      color: AppColors.primaryButton, // Adjusted to match your primary blue
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -134,7 +135,7 @@ class _StoreScreenState extends State<StoreScreen> {
       final query = _searchQuery.toLowerCase();
       filteredList = filteredList.where((med) {
         return med.name.toLowerCase().contains(query) ||
-               med.type.toLowerCase().contains(query);
+              med.type.toLowerCase().contains(query);
       }).toList();
     } else {
       // If no search query, default to showing the first 4 items initially
