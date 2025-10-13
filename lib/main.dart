@@ -42,7 +42,7 @@ import 'screens/pharmacy_signup.dart';
 void main() {
   runApp(const UrMedioApp());
 }
-
+//i created main file
 class UrMedioApp extends StatelessWidget {
   const UrMedioApp({super.key});
 
