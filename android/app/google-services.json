@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496619516701",
+    "project_id": "urmedio",
+    "storage_bucket": "urmedio.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496619516701:android:52c50e13398221bb0f67f4",
+        "android_client_info": {
+          "package_name": "com.example.urmedio"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfLVISfEc-vWq_yH_iFaD-1SE_waYk29E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
