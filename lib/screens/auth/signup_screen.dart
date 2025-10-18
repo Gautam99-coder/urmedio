@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:urmedio/theme/colors.dart';
+import 'package:urmedio/widgets/custom_textfield.dart'; // ✅ import reusable field
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -9,18 +10,21 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
+  // ✅ Global key to validate the entire form
   final _formKey = GlobalKey<FormState>();
 
+  // ✅ Text controllers for each input field
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
-      TextEditingController();
+  TextEditingController();
 
-  bool agreeTerms = false;
+  bool agreeTerms = false; // ✅ checkbox state for terms and conditions
 
   @override
   void dispose() {
+    // ✅ Always dispose controllers to avoid memory leaks
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
@@ -28,7 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // --- THIS IS THE UPDATED DIALOG FUNCTION ---
+  // ✅ Custom success popup when user signs up successfully
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -41,29 +45,20 @@ class _SignupScreenState extends State<SignupScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const SizedBox(height: 20),
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.sky,
-                size: 80,
-              ),
+              const Icon(Icons.check_circle, color: AppColors.sky, size: 80),
               const SizedBox(height: 20),
               const Text(
                 'Registration Successful!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
                 'Your account has been created successfully.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 25),
+              // ✅ Button inside popup to navigate to Sign In page
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -80,7 +75,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(); // Close dialog
-                    // Replace the signup screen with the signin screen
                     Navigator.pushReplacementNamed(context, '/signin');
                   },
                 ),
@@ -93,8 +87,11 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  // ✅ Main sign-up logic
   void _signUp() {
+    // Validate all form fields first
     if (_formKey.currentState!.validate()) {
+      // Check if user accepted terms
       if (!agreeTerms) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -104,19 +101,22 @@ class _SignupScreenState extends State<SignupScreen> {
         );
         return;
       }
-      print('Form is valid. Proceeding with registration...');
+
+      // ✅ If everything valid, show success popup
       _showSuccessDialog();
-    } else {
-      print('Form is invalid.');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Screen width for responsiveness
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
+          // ✅ Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -125,32 +125,35 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
           ),
+
+          // ✅ Safe area to prevent overlapping system UI
           SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(screenWidth * 0.05),
               child: Form(
-                key: _formKey,
+                key: _formKey, // Attach form key for validation
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ✅ Back arrow button
                     IconButton(
                       icon: const Icon(Icons.arrow_back, size: 28),
                       onPressed: () => Navigator.pushNamed(context, '/splash'),
                     ),
-                    const SizedBox(height: 40),
+                    SizedBox(height: screenWidth * 0.1),
+
+                    // ✅ Title text
                     const Text(
                       "Create \nAccount",
-                      style:
-                          TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 20),
-                    TextFormField(
+                    SizedBox(height: screenWidth * 0.05),
+
+                    // ✅ Using custom reusable text fields
+                    CustomTextField(
+                      label: "Name",
+                      prefixIcon: Icons.person_outline,
                       controller: nameController,
-                      decoration: const InputDecoration(
-                        labelText: "Name",
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
-                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your name';
@@ -158,15 +161,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 15),
-                    TextFormField(
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Email",
+                      prefixIcon: Icons.email_outlined,
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: "Email",
-                        prefixIcon: Icon(Icons.email_outlined),
-                        border: OutlineInputBorder(),
-                      ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email';
@@ -177,15 +178,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 15),
-                    TextFormField(
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Password",
+                      prefixIcon: Icons.lock_outline,
                       controller: passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: "Password",
-                        prefixIcon: Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(),
-                      ),
+                      isPassword: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a password';
@@ -196,15 +195,13 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 15),
-                    TextFormField(
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Confirm Password",
+                      prefixIcon: Icons.lock_outline,
                       controller: confirmPasswordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: "Confirm Password",
-                        prefixIcon: Icon(Icons.lock_outline),
-                        border: OutlineInputBorder(),
-                      ),
+                      isPassword: true,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please confirm your password';
@@ -215,6 +212,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         return null;
                       },
                     ),
+
+                    // ✅ Terms & Pharmacy Signup Row
                     Row(
                       children: [
                         Checkbox(
@@ -241,7 +240,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: screenWidth * 0.03),
+
+                    // ✅ Sign Up button with circle image
                     Align(
                       alignment: Alignment.centerRight,
                       child: SizedBox(
@@ -250,7 +251,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: OutlinedButton(
                           onPressed: _signUp,
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.only(left: 205),
+                            padding: EdgeInsets.only(left: screenWidth * 0.55),
                             side: BorderSide.none,
                             backgroundColor: Colors.transparent,
                             overlayColor: Colors.transparent,
@@ -284,8 +285,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20),
                                     image: const DecorationImage(
-                                      image: AssetImage(
-                                          'assets/images/circle.png'),
+                                      image: AssetImage('assets/images/circle.png'),
                                       fit: BoxFit.cover,
                                     ),
                                     boxShadow: [
@@ -304,6 +304,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
+
+                    // ✅ Divider + Google sign up button
                     Row(
                       children: const [
                         Expanded(child: Divider(thickness: 1)),
@@ -314,7 +316,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         Expanded(child: Divider(thickness: 1)),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: screenWidth * 0.05),
+
                     SizedBox(
                       height: 30,
                       width: double.infinity,
@@ -347,6 +350,9 @@ class _SignupScreenState extends State<SignupScreen> {
                         ),
                       ),
                     ),
+
+                    // ✅ Navigate to sign in page
+                    SizedBox(height: screenWidth * 0.03),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -358,8 +364,9 @@ class _SignupScreenState extends State<SignupScreen> {
                           child: const Text(
                             "Sign in",
                             style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold),
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],

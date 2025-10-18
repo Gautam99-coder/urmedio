@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:urmedio/theme/colors.dart';
+import 'package:urmedio/widgets/custom_textfield.dart'; // ✅ Reusable input field
 
 class PharmacySignup extends StatefulWidget {
   const PharmacySignup({super.key});
@@ -9,64 +10,54 @@ class PharmacySignup extends StatefulWidget {
 }
 
 class _PharmacySignupState extends State<PharmacySignup> {
-  // 1. Add a GlobalKey for the Form
+  // ✅ GlobalKey for validating the whole form
   final _formKey = GlobalKey<FormState>();
 
+  // ✅ Text controllers for all fields
+  final TextEditingController pharmacyIdController = TextEditingController();
   final TextEditingController pharmacyNameController = TextEditingController();
-  final TextEditingController ownerNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-  bool agreeTerms = false;
+  bool agreeTerms = false; // ✅ For checkbox
 
   @override
   void dispose() {
-    // It's good practice to dispose of controllers
+    // ✅ Always dispose controllers
+    pharmacyIdController.dispose();
     pharmacyNameController.dispose();
-    ownerNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }
 
-  // 4. Function to show the success dialog
+  // ✅ Show success popup after registration
   void _showSuccessDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: [
               const SizedBox(height: 20),
-              const Icon(
-                Icons.check_circle,
-                color: AppColors.sky,
-                size: 80,
-              ),
+              const Icon(Icons.check_circle, color: AppColors.sky, size: 80),
               const SizedBox(height: 20),
               const Text(
                 'Registration Successful!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Text(
-                'Your pharmacy account has been created.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
+                'Your pharmacy account has been created successfully.',
+                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 25),
+              // ✅ Continue button to go to pharmacy home page
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -82,13 +73,11 @@ class _PharmacySignupState extends State<PharmacySignup> {
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
-                    // Navigate to pharmacy home, replacing the signup screen
-                    Navigator.pushReplacementNamed(context, '/phomePage');
+                    Navigator.of(context).pop(); // Close popup
+                    Navigator.pushReplacementNamed(context, '/phomePage'); // ✅ Go to pharmacy home
                   },
                 ),
               ),
-              const SizedBox(height: 10),
             ],
           ),
         );
@@ -96,7 +85,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
     );
   }
 
-  // 5. Function to handle the sign-up logic
+  // ✅ Function to handle sign-up validation logic
   void _signUp() {
     if (_formKey.currentState!.validate()) {
       if (!agreeTerms) {
@@ -108,258 +97,249 @@ class _PharmacySignupState extends State<PharmacySignup> {
         );
         return;
       }
-      // If validation passes and terms are agreed, show the dialog
-      _showSuccessDialog();
+      _showSuccessDialog(); // ✅ If valid and agreed, show success popup
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ✅ Screen width for responsiveness
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          SizedBox.expand(
-            child: Image.asset(
-              'assets/images/bg1.png',
-              fit: BoxFit.cover,
+          // ✅ Background image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg1.png'),
+                fit: BoxFit.cover,
+              ),
             ),
           ),
+
           SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                // 2. Wrap the Column with a Form widget
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back, size: 28),
-                          color: const Color.fromARGB(255, 47, 46, 46),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ),
-                      const SizedBox(height: 50),
-                      const Text(
-                        "Create \nPharmacy Account",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ✅ Back Arrow Button
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, size: 28),
+                      color: Colors.black,
+                      onPressed: () => Navigator.pushNamed(context, '/signup'),
+                    ),
+                    SizedBox(height: screenWidth * 0.1),
 
-                      // 3. Replace CustomTextFields with TextFormFields for validation
-                      TextFormField(
-                        controller: pharmacyNameController,
-                        decoration: const InputDecoration(
-                          labelText: "Pharmacy Id",
-                          prefixIcon: Icon(Icons.local_pharmacy_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter Pharmacy ID';
-                          }
-                          return null;
-                        },
+                    // ✅ Title
+                    const Text(
+                      "Create \nPharmacy Account",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        controller: ownerNameController,
-                        decoration: const InputDecoration(
-                          labelText: "Pharmacy Name",
-                          prefixIcon: Icon(Icons.person_outline),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the pharmacy name';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        controller: emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: "Email",
-                          prefixIcon: Icon(Icons.email_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter an email';
-                          }
-                          if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                            return 'Please enter a valid email address';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        controller: passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: "Password",
-                          prefixIcon: Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a password';
-                          }
-                          if (value.length < 6) {
-                            return 'Password must be at least 6 characters';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 15),
-                      TextFormField(
-                        controller: confirmPasswordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: "Confirm Password",
-                          prefixIcon: Icon(Icons.lock_outline),
-                          border: OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                      ),
+                    ),
+                    SizedBox(height: screenWidth * 0.05),
 
-                      const SizedBox(height: 0),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: agreeTerms,
-                            onChanged: (val) {
-                              setState(() {
-                                agreeTerms = val ?? false;
-                              });
-                            },
-                          ),
-                          const Expanded(
-                            child: Text(
-                              "Agree Terms & Conditions",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black,
-                              ),
+                    // ✅ Input fields using CustomTextField
+                    CustomTextField(
+                      label: "Pharmacy ID",
+                      prefixIcon: Icons.local_pharmacy_outlined,
+                      controller: pharmacyIdController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Pharmacy ID';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Pharmacy Name",
+                      prefixIcon: Icons.store_outlined,
+                      controller: pharmacyNameController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter Pharmacy Name';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Email",
+                      prefixIcon: Icons.email_outlined,
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your email';
+                        }
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return 'Please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Password",
+                      prefixIcon: Icons.lock_outline,
+                      controller: passwordController,
+                      isPassword: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a password';
+                        }
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: screenWidth * 0.04),
+
+                    CustomTextField(
+                      label: "Confirm Password",
+                      prefixIcon: Icons.lock_outline,
+                      controller: confirmPasswordController,
+                      isPassword: true,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please confirm your password';
+                        }
+                        if (value != passwordController.text) {
+                          return 'Passwords do not match';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    // ✅ Terms Checkbox
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: agreeTerms,
+                          onChanged: (val) {
+                            setState(() {
+                              agreeTerms = val ?? false;
+                            });
+                          },
+                        ),
+                        const Text(
+                          "Agree Terms & Conditions",
+                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        ),
+                      ],
+                    ),
+
+                    // ✅ Signup button
+                    SizedBox(height: screenWidth * 0.02),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: _signUp,
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.only(left: screenWidth * 0.55),
+                            side: BorderSide.none,
+                            backgroundColor: Colors.transparent,
+                            overlayColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 0),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: SizedBox(
-                          height: 50,
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _signUp, // 5. Call signUp function
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.only(left: 205),
-                              side: BorderSide.none,
-                              backgroundColor: Colors.transparent,
-                              overlayColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                InkWell(
-                                  onTap: _signUp, // 5. Call signUp function
-                                  hoverColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  child: const Text(
-                                    'Sign up',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              InkWell(
+                                onTap: _signUp,
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                child: const Text(
+                                  'Sign up',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: _signUp, // 5. Call signUp function
-                                  hoverColor: Colors.transparent,
-                                  splashColor: Colors.transparent,
-                                  child: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.circular(20),
-                                      image: const DecorationImage(
-                                        image: AssetImage(
-                                            'assets/images/circle.png'),
-                                        fit: BoxFit.cover,
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: _signUp,
+                                hoverColor: Colors.transparent,
+                                splashColor: Colors.transparent,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    image: const DecorationImage(
+                                      image: AssetImage('assets/images/circle.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.25),
+                                        blurRadius: 6,
+                                        spreadRadius: 1,
+                                        offset: const Offset(2, 4),
                                       ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black
-                                              .withOpacity(0.25),
-                                          blurRadius: 6,
-                                          spreadRadius: 1,
-                                          offset: const Offset(2, 4),
-                                        ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Row(
-                        children: const [
-                          Expanded(child: Divider(thickness: 1)),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: Text("OR"),
-                          ),
-                          Expanded(child: Divider(thickness: 1)),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      const SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text("Already have an account? "),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, '/signin');
-                            },
-                            child: const Text(
-                              "Sign in",
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: screenWidth * 0.05),
+
+                    // ✅ Divider
+                    Row(
+                      children: const [
+                        Expanded(child: Divider(thickness: 1)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("OR"),
+                        ),
+                        Expanded(child: Divider(thickness: 1)),
+                      ],
+                    ),
+                    SizedBox(height: screenWidth * 0.05),
+
+                    // ✅ Navigation to Sign In
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, '/signin');
+                          },
+                          child: const Text(
+                            "Sign in",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),
