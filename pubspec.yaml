@@ -39,6 +39,10 @@ dependencies:
   image_picker: ^1.2.0
   dotted_border: ^3.1.0
   uuid: ^4.5.1
+  firebase: ^9.0.3
+  firebase_core: ^3.3.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.1.0
 
 dev_dependencies:
   flutter_test:
