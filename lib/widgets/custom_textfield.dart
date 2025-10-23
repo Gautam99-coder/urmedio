@@ -26,12 +26,19 @@ class _CustomTextFieldState extends State<CustomTextField> {
   bool _obscureText = true;
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize _obscureText based on isPassword
+    _obscureText = widget.isPassword;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return TextFormField(
       controller: widget.controller,
-      obscureText: widget.isPassword ? _obscureText : false,
+      obscureText: _obscureText, // Use the state variable
       validator: widget.validator,
       keyboardType: widget.keyboardType,
       decoration: InputDecoration(
@@ -42,15 +49,15 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
         suffixIcon: widget.isPassword
             ? IconButton(
-          icon: Icon(
-            _obscureText ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: () {
-            setState(() {
-              _obscureText = !_obscureText;
-            });
-          },
-        )
+                icon: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
+                },
+              )
             : null,
         contentPadding: EdgeInsets.symmetric(
           vertical: screenWidth * 0.035,
@@ -60,4 +67,3 @@ class _CustomTextFieldState extends State<CustomTextField> {
     );
   }
 }
-
