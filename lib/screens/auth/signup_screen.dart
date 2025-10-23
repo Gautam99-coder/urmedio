@@ -2,49 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:urmedio/services/google_sigin_in_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// NOTE: Assuming these imports point to custom files or are defined elsewhere
+
+// ✅ REMOVED PLACEHOLDERS AND ADDED REAL IMPORTS
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
 
-// --- Placeholder/Necessary Imports Definitions (for context) ---
-// Note: If you have actual files, remove these placeholders.
-class AppColors {
-  static const Color sky = Colors.blue;
-  static const Color primaryButton = Colors.blue;
-}
-
-class CustomTextField extends StatelessWidget {
-  final String label;
-  final IconData prefixIcon;
-  final TextEditingController controller;
-  final TextInputType keyboardType;
-  final String? Function(String?)? validator;
-  final bool isPassword;
-
-  const CustomTextField({
-    super.key,
-    required this.label,
-    required this.prefixIcon,
-    required this.controller,
-    this.keyboardType = TextInputType.text,
-    this.validator,
-    this.isPassword = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(prefixIcon),
-      ),
-      validator: validator,
-    );
-  }
-}
+import '../splash_screen.dart';
 
 // -----------------------------------------------------------
 
@@ -213,9 +176,13 @@ class _SignupScreenState extends State<SignupScreen> {
       }
     } on Exception catch (e) {
       if (!mounted) return;
-      _showErrorSnackBar('Google Sign-Up/Sign-In failed: $e');
+      // Using a cleaner error message
+      _showErrorSnackBar('Google Sign-In failed. Please try again.');
+      print('Google Sign-In Error: $e'); // For your debugging
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -227,7 +194,10 @@ class _SignupScreenState extends State<SignupScreen> {
       children: [
         IconButton(
           icon: const Icon(Icons.arrow_back, size: 28),
-          onPressed: () => Navigator.pushNamed(context, '/splash'),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SplashScreen()),
+          ),
         ),
         SizedBox(height: screenWidth * 0.1),
         const Text(
@@ -242,6 +212,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _buildFormFields(double screenWidth) {
     return Column(
       children: [
+        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Name",
           prefixIcon: Icons.person_outline,
@@ -254,6 +225,7 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
+        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Email",
           prefixIcon: Icons.email_outlined,
@@ -270,6 +242,7 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
+        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Password",
           prefixIcon: Icons.lock_outline,
@@ -286,6 +259,7 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
+        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Confirm Password",
           prefixIcon: Icons.lock_outline,
@@ -305,6 +279,9 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
+  //
+  // ✅ This is your code block with your fix for the text wrapping
+  //
   Widget _buildTermsAndPharmacyRow() {
     return Row(
       children: [
@@ -316,7 +293,7 @@ class _SignupScreenState extends State<SignupScreen> {
             });
           },
         ),
-        const Text("Agree Terms & Conditions"),
+        const Text("Agree Terms & \nConditions"), // Your manual line break
         const Spacer(),
         GestureDetector(
           onTap: () {
@@ -352,39 +329,39 @@ class _SignupScreenState extends State<SignupScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: AppColors.primaryButton)
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Sign up',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/circle.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: Offset(2, 4),
-                        ),
-                      ],
-                    ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sign up',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/circle.png'),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                    offset: Offset(2, 4),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -423,9 +400,9 @@ class _SignupScreenState extends State<SignupScreen> {
             image: _isLoading
                 ? null
                 : const DecorationImage(
-                    image: AssetImage('assets/images/googleup.png'),
-                    fit: BoxFit.cover,
-                  ),
+              image: AssetImage('assets/images/googleup.png'),
+              fit: BoxFit.cover,
+            ),
             color: _isLoading ? Colors.grey[300] : null,
             boxShadow: [
               BoxShadow(
@@ -437,7 +414,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ],
           ),
           child:
-              _isLoading ? const Center(child: CircularProgressIndicator()) : null,
+          _isLoading ? const Center(child: CircularProgressIndicator()) : null,
         ),
       ),
     );
