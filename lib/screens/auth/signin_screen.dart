@@ -2,44 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:urmedio/services/google_sigin_in_service.dart';
 
-// Placeholder theme and text field widgets (replace with your actual files)
-class AppColors {
-  static const Color sky = Colors.blue;
-  static const Color primaryButton = Colors.blue;
-}
-
-class CustomTextField extends StatelessWidget {
-  final String label;
-  final IconData prefixIcon;
-  final TextEditingController controller;
-  final TextInputType keyboardType;
-  final String? Function(String?)? validator;
-  final bool isPassword;
-
-  const CustomTextField({
-    super.key,
-    required this.label,
-    required this.prefixIcon,
-    required this.controller,
-    this.keyboardType = TextInputType.text,
-    this.validator,
-    this.isPassword = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: isPassword,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(prefixIcon),
-      ),
-      validator: validator,
-    );
-  }
-}
+// ✅ IMPORTED YOUR REAL WIDGETS AND COLORS
+import 'package:urmedio/theme/colors.dart';
+import 'package:urmedio/widgets/custom_textfield.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -107,6 +72,12 @@ class _SigninScreenState extends State<SigninScreen> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pop();
+                    //
+                    // This is your logic: it works for both user types
+                    // You will add the logic here to check if the user
+                    // is a 'pharmacy' or 'customer' and navigate accordingly.
+                    // For now, it goes to /homePage as you wrote.
+                    //
                     Navigator.pushReplacementNamed(context, '/homePage');
                   },
                   child: const Text(
@@ -193,7 +164,7 @@ class _SigninScreenState extends State<SigninScreen> {
   Widget _buildFormFields(double screenWidth) {
     return Column(
       children: [
-        CustomTextField(
+        CustomTextField( // ✅ USES YOUR NEW TEXTFIELD STYLE
           label: "Email",
           prefixIcon: Icons.email_outlined,
           controller: emailController,
@@ -209,7 +180,7 @@ class _SigninScreenState extends State<SigninScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
-        CustomTextField(
+        CustomTextField( // ✅ USES YOUR NEW TEXTFIELD STYLE
           label: "Password",
           prefixIcon: Icons.lock_outline,
           controller: passwordController,
@@ -269,39 +240,39 @@ class _SigninScreenState extends State<SigninScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: AppColors.primaryButton)
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Sign in',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/circle.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: Offset(2, 4),
-                        ),
-                      ],
-                    ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sign in',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/circle.png'),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                    offset: Offset(2, 4),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -340,9 +311,9 @@ class _SigninScreenState extends State<SigninScreen> {
             image: _isLoading
                 ? null
                 : const DecorationImage(
-                    image: AssetImage('assets/images/googleup.png'),
-                    fit: BoxFit.cover,
-                  ),
+              image: AssetImage('assets/images/googleup.png'),
+              fit: BoxFit.cover,
+            ),
             color: _isLoading ? Colors.grey[300] : null,
             boxShadow: [
               BoxShadow(
@@ -354,7 +325,7 @@ class _SigninScreenState extends State<SigninScreen> {
             ],
           ),
           child:
-              _isLoading ? const Center(child: CircularProgressIndicator()) : null,
+          _isLoading ? const Center(child: CircularProgressIndicator()) : null,
         ),
       ),
     );
