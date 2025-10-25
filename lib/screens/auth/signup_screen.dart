@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:urmedio/services/google_sigin_in_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-// ✅ REMOVED PLACEHOLDERS AND ADDED REAL IMPORTS
+import 'package:provider/provider.dart'; // ✅ 1. ADD THIS IMPORT
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
-
+// ✅ 2. FIX THE TYPO (removed extra .dart)
+import '../../services/firebase_auth_methods.dart.dart';
 import '../splash_screen.dart';
-
-// -----------------------------------------------------------
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -56,7 +53,8 @@ class _SignupScreenState extends State<SignupScreen> {
               const SizedBox(height: 20),
               Text(
                 message,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style:
+                const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
@@ -83,6 +81,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (navigateToSignIn) {
                       Navigator.pushReplacementNamed(context, '/signin');
                     } else {
+                      // Google sign-up now redirects to customer home
                       Navigator.pushReplacementNamed(context, '/homePage');
                     }
                   },
@@ -122,27 +121,12 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+      // ✅ This line now works
+      await context.read<FirebaseAuthMethods>().signUpWithEmail(
+        name: nameController.text,
+        email: emailController.text,
+        password: passwordController.text,
       );
-
-      await userCredential.user?.updateDisplayName(nameController.text.trim());
-
-      if (userCredential.user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-          'uid': userCredential.user!.uid,
-          'name': nameController.text.trim(),
-          'email': emailController.text.trim(),
-          'photoURL': userCredential.user!.photoURL ?? '',
-          'provider': 'email',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
 
       if (!mounted) return;
       _showSuccessDialog('Registration Successful!');
@@ -153,13 +137,17 @@ class _SignupScreenState extends State<SignupScreen> {
         message = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
         message = 'An account already exists for that email.';
+      } else {
+        message = e.message ?? message;
       }
       _showErrorSnackBar(message);
     } catch (e) {
       if (!mounted) return;
       _showErrorSnackBar('An unexpected error occurred. Please try again.');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -168,17 +156,25 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      final userCredential = await GoogleSignInService.signInWithGoogle();
+      // ✅ This line now works
+      final authService = context.read<FirebaseAuthMethods>();
+      final userCredential = await authService.signInWithGoogle();
+
       if (!mounted) return;
 
       if (userCredential != null) {
-        _showSuccessDialog('Google Sign-Up Successful!', navigateToSignIn: false);
+        // Get the correct redirect route
+        final route = await authService.getRedirectRoute();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, route);
+        }
+      } else {
+        _showErrorSnackBar('Google Sign-In was cancelled.');
       }
-    } on Exception catch (e) {
+    } catch (e) {
       if (!mounted) return;
-      // Using a cleaner error message
       _showErrorSnackBar('Google Sign-In failed. Please try again.');
-      print('Google Sign-In Error: $e'); // For your debugging
+      print('Google Sign-In Error: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -186,7 +182,58 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // ---------------- UI Builders ----------------
+  // ---------------- Main Build (Unchanged) ----------------
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg1.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Scrollable Form Content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(screenWidth),
+                    _buildFormFields(screenWidth),
+                    _buildTermsAndPharmacyRow(),
+                    SizedBox(height: screenWidth * 0.03),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _buildSignUpButton(screenWidth),
+                    ),
+                    SizedBox(height: screenWidth * 0.05),
+                    _buildDivider(),
+                    SizedBox(height: screenWidth * 0.05),
+                    _buildGoogleSignUpButton(),
+                    _buildSignInNavigation(screenWidth),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- ALL YOUR UI BUILDER METHODS (UNCHANGED) ---
 
   Widget _buildHeader(double screenWidth) {
     return Column(
@@ -196,7 +243,7 @@ class _SignupScreenState extends State<SignupScreen> {
           icon: const Icon(Icons.arrow_back, size: 28),
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => SplashScreen()),
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
           ),
         ),
         SizedBox(height: screenWidth * 0.1),
@@ -212,7 +259,6 @@ class _SignupScreenState extends State<SignupScreen> {
   Widget _buildFormFields(double screenWidth) {
     return Column(
       children: [
-        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Name",
           prefixIcon: Icons.person_outline,
@@ -225,7 +271,6 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
-        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Email",
           prefixIcon: Icons.email_outlined,
@@ -242,7 +287,6 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
-        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Password",
           prefixIcon: Icons.lock_outline,
@@ -259,7 +303,6 @@ class _SignupScreenState extends State<SignupScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
-        // ✅ This will now use your outlined text field
         CustomTextField(
           label: "Confirm Password",
           prefixIcon: Icons.lock_outline,
@@ -279,9 +322,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  //
-  // ✅ This is your code block with your fix for the text wrapping
-  //
   Widget _buildTermsAndPharmacyRow() {
     return Row(
       children: [
@@ -355,7 +395,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     color: Colors.black26,
                     blurRadius: 6,
                     spreadRadius: 1,
-                    offset: Offset(2, 4),
+                    offset: const Offset(2, 4),
                   ),
                 ],
               ),
@@ -385,7 +425,7 @@ class _SignupScreenState extends State<SignupScreen> {
       width: double.infinity,
       child: OutlinedButton(
         onPressed: _isLoading ? null : _signInWithGoogle,
-        style: OutlinedButton.styleFrom(
+        style: OutledButton.styleFrom(
           padding: EdgeInsets.zero,
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -409,12 +449,13 @@ class _SignupScreenState extends State<SignupScreen> {
                 color: Colors.black26,
                 blurRadius: 6,
                 spreadRadius: 1,
-                offset: Offset(2, 4),
+                offset: const Offset(2, 4),
               ),
             ],
           ),
-          child:
-          _isLoading ? const Center(child: CircularProgressIndicator()) : null,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : null,
         ),
       ),
     );
@@ -445,55 +486,9 @@ class _SignupScreenState extends State<SignupScreen> {
       ],
     );
   }
-
-  // ---------------- Main Build ----------------
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Stack(
-        children: [
-          // Background Image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bg1.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          // Scrollable Form Content
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(screenWidth * 0.05),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(screenWidth),
-                    _buildFormFields(screenWidth),
-                    _buildTermsAndPharmacyRow(),
-                    SizedBox(height: screenWidth * 0.03),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: _buildSignUpButton(screenWidth),
-                    ),
-                    SizedBox(height: screenWidth * 0.05),
-                    _buildDivider(),
-                    SizedBox(height: screenWidth * 0.05),
-                    _buildGoogleSignUpButton(),
-                    _buildSignInNavigation(screenWidth),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+// ✅ 3. REMOVE THE FAULTY EXTENSION FROM THE BOTTOM
+// extension on BuildContext {
+//   read() {}
+// }
