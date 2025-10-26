@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:urmedio/services/google_sigin_in_service.dart';
-
-// ✅ IMPORTED YOUR REAL WIDGETS AND COLORS
+import 'package:provider/provider.dart'; // ✅ THIS IS THE FIX
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
+
+import '../../services/firebase_auth_methods.dart.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -27,69 +27,12 @@ class _SigninScreenState extends State<SigninScreen> {
   }
 
   void _showErrorSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
       ),
-    );
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(height: 20),
-              const Icon(Icons.check_circle, color: AppColors.sky, size: 80),
-              const SizedBox(height: 20),
-              const Text(
-                'Sign In Successful!',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Welcome back!',
-                style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 25),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryButton,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    //
-                    // This is your logic: it works for both user types
-                    // You will add the logic here to check if the user
-                    // is a 'pharmacy' or 'customer' and navigate accordingly.
-                    // For now, it goes to /homePage as you wrote.
-                    //
-                    Navigator.pushReplacementNamed(context, '/homePage');
-                  },
-                  child: const Text(
-                    'CONTINUE',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -100,27 +43,34 @@ class _SigninScreenState extends State<SigninScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+      // ✅ This line now works
+      final authService = context.read<FirebaseAuthMethods>();
+      await authService.signInWithEmail(
+        email: emailController.text,
+        password: passwordController.text,
       );
 
-      if (!mounted) return;
-      _showSuccessDialog();
+      // Get the correct redirect route
+      final route = await authService.getRedirectRoute();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, route);
+      }
     } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
       String message = 'Sign In failed.';
       if (e.code == 'user-not-found' ||
           e.code == 'wrong-password' ||
           e.code == 'invalid-credential') {
         message = 'Invalid email or password.';
+      } else {
+        message = e.message ?? message;
       }
       _showErrorSnackBar(message);
     } catch (e) {
-      if (!mounted) return;
       _showErrorSnackBar('An unexpected error occurred. Please try again.');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -128,21 +78,80 @@ class _SigninScreenState extends State<SigninScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      final userCredential = await GoogleSignInService.signInWithGoogle();
+      // ✅ This line now works
+      final authService = context.read<FirebaseAuthMethods>();
+      final userCredential = await authService.signInWithGoogle();
+
       if (!mounted) return;
 
       if (userCredential != null) {
-        _showSuccessDialog();
+        // Get the correct redirect route
+        final route = await authService.getRedirectRoute();
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, route);
+        }
       }
+      // If userCredential is null, the user cancelled, so do nothing.
     } on Exception catch (e) {
-      if (!mounted) return;
       _showErrorSnackBar('Google Sign-In failed: $e');
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  // ---------------- UI Builders ----------------
+  // ---------------- UI Build (Unchanged) ----------------
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bg1.png'),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(screenWidth * 0.05),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(screenWidth),
+                    _buildFormFields(screenWidth),
+                    _buildForgotPasswordRow(),
+                    SizedBox(height: screenWidth * 0.04),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _buildSignInButton(screenWidth),
+                    ),
+                    SizedBox(height: screenWidth * 0.05),
+                    _buildDivider(),
+                    SizedBox(height: screenWidth * 0.05),
+                    _buildGoogleSignInButton(screenWidth),
+                    _buildSignUpNavigation(screenWidth),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- ALL YOUR UI BUILDER METHODS (UNCHANGED) ---
+
   Widget _buildHeader(double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +173,7 @@ class _SigninScreenState extends State<SigninScreen> {
   Widget _buildFormFields(double screenWidth) {
     return Column(
       children: [
-        CustomTextField( // ✅ USES YOUR NEW TEXTFIELD STYLE
+        CustomTextField(
           label: "Email",
           prefixIcon: Icons.email_outlined,
           controller: emailController,
@@ -180,7 +189,7 @@ class _SigninScreenState extends State<SigninScreen> {
           },
         ),
         SizedBox(height: screenWidth * 0.04),
-        CustomTextField( // ✅ USES YOUR NEW TEXTFIELD STYLE
+        CustomTextField(
           label: "Password",
           prefixIcon: Icons.lock_outline,
           controller: passwordController,
@@ -205,6 +214,7 @@ class _SigninScreenState extends State<SigninScreen> {
       children: [
         GestureDetector(
           onTap: () {
+            // This navigation now works because we added the route
             Navigator.pushNamed(context, '/forgetPass');
           },
           child: const Padding(
@@ -266,7 +276,7 @@ class _SigninScreenState extends State<SigninScreen> {
                     color: Colors.black26,
                     blurRadius: 6,
                     spreadRadius: 1,
-                    offset: Offset(2, 4),
+                    offset: const Offset(2, 4),
                   ),
                 ],
               ),
@@ -320,12 +330,13 @@ class _SigninScreenState extends State<SigninScreen> {
                 color: Colors.black26,
                 blurRadius: 6,
                 spreadRadius: 1,
-                offset: Offset(2, 4),
+                offset: const Offset(2, 4),
               ),
             ],
           ),
-          child:
-          _isLoading ? const Center(child: CircularProgressIndicator()) : null,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : null,
         ),
       ),
     );
@@ -354,53 +365,6 @@ class _SigninScreenState extends State<SigninScreen> {
           ],
         ),
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bg1.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(screenWidth * 0.05),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(screenWidth),
-                    _buildFormFields(screenWidth),
-                    _buildForgotPasswordRow(),
-                    SizedBox(height: screenWidth * 0.04),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: _buildSignInButton(screenWidth),
-                    ),
-                    SizedBox(height: screenWidth * 0.05),
-                    _buildDivider(),
-                    SizedBox(height: screenWidth * 0.05),
-                    _buildGoogleSignInButton(screenWidth),
-                    _buildSignUpNavigation(screenWidth),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
