@@ -2,11 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async'; // For Timer
 
+// Define the purpose of this OTP screen
+enum VerificationPurpose { signUp, passwordReset }
+
 class OtpVerificationScreen extends StatefulWidget {
-  // Option to receive email argument from previous screen
-  final String? email;
-  // Added required key for consistency, though it's optional
-  const OtpVerificationScreen({super.key, this.email});
+  final String email;
+  final String? name; // Added for sign-up flow
+  final String? photoUrl; // Added for sign-up flow
+  final VerificationPurpose purpose; // To decide the post-verification action
+
+  const OtpVerificationScreen({
+    super.key,
+    required this.email,
+    this.name,
+    this.photoUrl,
+    // Default to passwordReset if not specified, based on your original dialog
+    this.purpose = VerificationPurpose.passwordReset, 
+  });
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -19,25 +31,23 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final TextEditingController _fieldThree = TextEditingController();
   final TextEditingController _fieldFour = TextEditingController();
 
-  static const primaryBlue = Color.fromARGB(255, 20, 40, 95);
+  static const primaryBlue = Color.fromARGB(255, 22, 50, 98); // Changed to your original primary color
 
-  // --- Timer State FIX ---
-  // Changed from late Timer to nullable Timer? to fix LateInitializationError
   Timer? _timer;
   int _start = 60;
   bool _canResend = false;
   bool _isVerifying = false;
-  // --- End Timer State FIX ---
 
   @override
   void initState() {
     super.initState();
     startTimer();
+    // 💡 Call the initial "Send OTP" function here, since initState is only called once.
+    _sendInitialOtp();
   }
 
   @override
   void dispose() {
-    // ⚠️ CRITICAL FIX: Safely cancel the timer and dispose controllers
     _timer?.cancel();
     _fieldOne.dispose();
     _fieldTwo.dispose();
@@ -45,20 +55,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     _fieldFour.dispose();
     super.dispose();
   }
+  
+  // --- Core Methods: Timer & OTP Actions ---
 
   void startTimer() {
-    // Cancel any existing timer safely
     _timer?.cancel();
-
     const oneSec = Duration(seconds: 1);
     _canResend = false;
     _start = 60;
 
-    // Assign the new timer instance
     _timer = Timer.periodic(
       oneSec,
-          (Timer timer) {
-        // Stop timer if the widget is not mounted (prevents another error)
+      (Timer timer) {
         if (!mounted) {
           timer.cancel();
           return;
@@ -76,44 +84,78 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       },
     );
   }
-
-  String get _combinedOtp =>
-      _fieldOne.text + _fieldTwo.text + _fieldThree.text + _fieldFour.text;
+  
+  // 💡 Placeholder for initial OTP sending logic
+  void _sendInitialOtp() {
+    // 🚨 Backend Integration Point 1: Send the first OTP email
+    // This function will call your Firebase Cloud Function or custom backend service
+    // to send an OTP to widget.email.
+    print("Initial OTP sent to: ${widget.email}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Verification code sent to ${widget.email}'),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 
   void _resendOtpAction() {
-    // 🚨 FIRBASE RESEND LOGIC HERE:
+    if (!_canResend) return;
+
+    // 🚨 Backend Integration Point 2: Resend OTP
+    // Call the same function as above to resend the OTP.
+    _sendInitialOtp();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Resending OTP...'),
-        duration: Duration(seconds: 1),
+        content: Text('OTP resent successfully.'),
+        duration: Duration(seconds: 2),
       ),
     );
     // Restart the timer
     startTimer();
   }
 
+  String get _combinedOtp =>
+      _fieldOne.text + _fieldTwo.text + _fieldThree.text + _fieldFour.text;
+
+  // --- Success Dialog ---
   void _showVerificationSuccessDialog() {
+    String title;
+    String message;
+    String nextRoute;
+    
+    if (widget.purpose == VerificationPurpose.passwordReset) {
+      title = 'OTP Verified';
+      message = 'The code has been verified. You can now reset your password.';
+      nextRoute = '/restPass';
+    } else {
+      // VerificationPurpose.signUp (Google Sign-Up Flow)
+      title = 'Account Verified!';
+      message = 'Your account has been verified. Welcome to the app!';
+      nextRoute = '/homePage'; // Navigate to the main application screen
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.lock_open_rounded, color: Colors.green, size: 28),
-            SizedBox(width: 10),
-            Text('OTP Verified', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Icon(widget.purpose == VerificationPurpose.passwordReset ? Icons.lock_open_rounded : Icons.check_circle_outline, 
+                color: Colors.green, size: 28),
+            const SizedBox(width: 10),
+            Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           ],
         ),
-        content: const Text(
-          'The code has been verified. You can now reset your password.',
-          style: TextStyle(fontSize: 14),
-        ),
+        content: Text(message, style: const TextStyle(fontSize: 14)),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              Navigator.pushNamed(context, '/restPass');
+              // Replace the current screen with the next route
+              Navigator.pushReplacementNamed(context, nextRoute);
             },
             child: const Text('CONTINUE', style: TextStyle(color: primaryBlue, fontWeight: FontWeight.bold)),
           ),
@@ -122,9 +164,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     );
   }
 
+  // --- Verify OTP Logic ---
   Future<void> _verifyOtp() async {
     if (_combinedOtp.length != 4) {
-      // Allow verification only if all fields are filled
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the full 4-digit code.'), backgroundColor: Colors.orange),
+      );
       return;
     }
 
@@ -133,21 +178,45 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     });
 
     try {
-      // 🚨 FIRBASE VERIFICATION LOGIC HERE:
-      // Simulate network delay
-      await Future.delayed(const Duration(milliseconds: 1500));
+      // 🚨 Backend Integration Point 3: Verify OTP
+      // Call your backend/Cloud Function to check if _combinedOtp matches the expected code for widget.email
+      await Future.delayed(const Duration(milliseconds: 2000)); // Simulate network
 
-      // If verification successful:
-      _showVerificationSuccessDialog();
+      // Assume success for now. Replace with actual API call result check.
+      bool isSuccessful = true; // REPLACE with: actualVerificationResult.isSuccess 
 
+      if (isSuccessful) {
+        if (widget.purpose == VerificationPurpose.signUp) {
+          // 🚨 Backend Integration Point 4: Finalize Google Sign-Up
+          // After OTP success, finalize the user account creation in Firestore 
+          // (e.g., set 'isVerified: true' and save name/photoUrl from the constructor).
+          // Then, sign the user into Firebase Auth permanently.
+          
+          // For now, we'll skip this complex backend step and just show success.
+          print('Sign-Up Finalization Required: ${widget.email}, ${widget.name}');
+        }
+        
+        _showVerificationSuccessDialog();
+      } else {
+        throw Exception('OTP verification failed.'); // Throw error for catch block
+      }
+      
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Invalid OTP. Please try again.'),
+          content: Text('Invalid OTP or verification failed. Please check the code.'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: Duration(seconds: 3),
         ),
       );
+      // Clear all fields on failure to re-enter
+      _fieldOne.clear();
+      _fieldTwo.clear();
+      _fieldThree.clear();
+      _fieldFour.clear();
+      FocusScope.of(context).requestFocus(FocusNode()); // Unfocus all
+      
     } finally {
       if (mounted) {
         setState(() {
@@ -156,6 +225,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       }
     }
   }
+
+  // --- UI Builder Methods (Mostly Unchanged) ---
 
   // Custom OTP input field
   Widget _otpInputField({
@@ -198,7 +269,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               _verifyOtp();
             }
           } else if (value.isEmpty && !autoFocus) {
-            // Move to previous field only if not the first field
             FocusScope.of(context).previousFocus();
           }
         },
@@ -206,7 +276,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     );
   }
 
-  // Timer Widget logic integrated directly
   Widget _buildResendTimer() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -227,7 +296,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           ),
         )
             : Text(
-          // Use padLeft to format the remaining seconds (e.g., 09)
           'Resend in 00:${_start.toString().padLeft(2, '0')}',
           style: TextStyle(
             color: primaryBlue.withOpacity(0.6),
@@ -241,8 +309,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Get email passed from ForgotPasswordScreen route arguments
-    String? emailFromRoute = ModalRoute.of(context)?.settings.arguments as String?;
+    // Determine the email and user greeting dynamically
+    final String displayEmail = widget.email;
+    final String greeting = widget.purpose == VerificationPurpose.signUp && widget.name != null && widget.name!.isNotEmpty 
+        ? 'Hello ${widget.name}!' 
+        : 'Verify OTP';
 
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -276,10 +347,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const SizedBox(height: 120),
-                              const Text('Verify OTP', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                              Text(greeting, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                               const SizedBox(height: 8),
                               Text(
-                                'Enter the 4-digit code sent to ${emailFromRoute ?? 'your email'}.',
+                                'Enter the 4-digit code sent to $displayEmail.',
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 16, color: Colors.grey),
                               ),
@@ -299,7 +370,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  // Call _verifyOtp explicitly when button is pressed
                                   onPressed: _isVerifying ? null : () => _verifyOtp(),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: primaryBlue,
