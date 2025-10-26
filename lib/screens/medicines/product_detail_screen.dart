@@ -1,37 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:urmedio/widgets/bottom_navbar.dart'; // Import the custom BottomNavBar widget
-import 'package:urmedio/widgets/medicine_card.dart';
-// Assuming this path contains the Medicine model and allMedicines list
-
-// Assuming this import is correct based on your file structure
-// import 'package:urmedio/widgets/medicine_card.dart'; 
+import 'package:cloud_firestore/cloud_firestore.dart'; // ✅ Import Firestore
+import 'package:cached_network_image/cached_network_image.dart'; // ✅ Import Network Image
+import 'package:urmedio/models/medicine_model.dart'; // ✅ Import your NEW model
+import 'package:urmedio/widgets/bottom_navbar.dart';
+// Note: 'medicine_card.dart' is not needed here
 
 class ProductDetailScreen extends StatelessWidget {
-  // --- KEY CHANGE: Accept a Medicine object ---
   final Medicine medicine;
 
   const ProductDetailScreen({super.key, required this.medicine});
 
   /// Builds the main product image container
   Widget _buildImageCard() {
-    // Cleaned up the formatting to eliminate any invisible/illegal characters
     return Container(
       height: 300,
       width: double.infinity,
       decoration: BoxDecoration(
-        // Use the background color from the medicine object for consistency
         color: medicine.backgroundColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        // Use the large image path from the medicine object
-        child: Image.asset(medicine.bigImagePath, fit: BoxFit.contain),
+        //
+        // --- 🚀 KEY CHANGE: Use Network Image ---
+        //
+        child: CachedNetworkImage(
+          imageUrl: medicine.bigImageUrl, // Use the big image URL
+          fit: BoxFit.contain,
+          placeholder: (context, url) =>
+              const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          errorWidget: (context, url, error) =>
+              const Icon(Icons.error, color: Colors.grey),
+        ),
       ),
     );
   }
 
-  /// Builds the name and description section (Dynamically populated)
+  /// Builds the name and description section (Already dynamic)
   Widget _buildMedicineInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +54,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the entire rating section with score and progress bars (Static for now)
+  /// Builds the entire rating section (Still static, you can make this dynamic later)
   Widget _buildRatingSection() {
     return Row(
       children: [
@@ -130,7 +135,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the price display (Dynamically populated)
+  /// Builds the price display (Already dynamic)
   Widget _buildPriceSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +153,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the list of nearby pharmacies
+  /// Builds the list of nearby pharmacies (Still static)
   Widget _buildNearbyPharmacies(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,6 +212,7 @@ class ProductDetailScreen extends StatelessWidget {
       children: [
         OutlinedButton(
           onPressed: () {
+            // TODO: Add logic to add 'medicine' to cart
             Navigator.pushNamed(context, '/cartPage');
           },
           style: OutlinedButton.styleFrom(
@@ -223,8 +229,8 @@ class ProductDetailScreen extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
+              // TODO: Add logic to buy 'medicine'
               Navigator.pushNamed(context, '/checkoutPage');
-              // Action for Buy Now
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color.fromARGB(255, 22, 64, 99),
@@ -243,7 +249,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the horizontal list of similar medicines (Dynamic)
+  /// Builds the horizontal list of similar medicines (NOW DYNAMIC)
   Widget _buildSimilarMedicines(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,31 +261,50 @@ class ProductDetailScreen extends StatelessWidget {
         const SizedBox(height: 16),
         SizedBox(
           height: 180,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            // Map over the similar medicines and pass the full object to the card builder
-            children: allMedicines
-                .where((med) => med.name != medicine.name)
-                .take(3)
-                .map((med) => _buildSimilarMedicineCard(
-                      med, // Pass the full Medicine object
-                      context, // Pass context for navigation
-                    ))
-                .toList(),
+          //
+          // --- 🚀 KEY CHANGE: Use a StreamBuilder ---
+          //
+          child: StreamBuilder<QuerySnapshot>(
+            // Fetch medicines of the same type, but not this one
+            stream: FirebaseFirestore.instance
+                .collection('medicines')
+                .where('type', isEqualTo: medicine.type)
+                .where('name', isNotEqualTo: medicine.name)
+                .limit(4) // Get up to 4 similar items
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text('No similar medicines found.'));
+              }
+
+              // We have data, build the list
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (context, index) {
+                  final simMedicine =
+                      Medicine.fromFirestore(snapshot.data!.docs[index]);
+                  return _buildSimilarMedicineCard(simMedicine, context);
+                },
+              );
+            },
           ),
         )
       ],
     );
   }
 
-  /// Helper for a single "similar medicine" card (Modified to handle navigation)
+  /// Helper for a single "similar medicine" card
   Widget _buildSimilarMedicineCard(
       Medicine similarMedicine, BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to the same product page, passing the new medicine object
-        Navigator.pushNamed(
+        // Navigate, replacing the current page with the new product
+        Navigator.pushReplacementNamed(
           context,
           '/productPage',
           arguments: similarMedicine,
@@ -296,21 +321,25 @@ class ProductDetailScreen extends StatelessWidget {
               height: 120,
               width: double.infinity,
               decoration: BoxDecoration(
-                // Use the similar medicine's background color
                 color: similarMedicine.backgroundColor.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
-                child: Image.asset(similarMedicine.imagePath, height: 100)), // Use the similar medicine's image
+                  // --- 🚀 KEY CHANGE: Use Network Image ---
+                  child: CachedNetworkImage(
+                imageUrl: similarMedicine.imageUrl,
+                height: 100,
+                fit: BoxFit.contain,
+              )),
             ),
             const SizedBox(height: 8),
             Text(
-              similarMedicine.name, // Dynamic name
+              similarMedicine.name,
               style: const TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
-            Text(similarMedicine.type, // Dynamic type (used as details)
+            Text(similarMedicine.type,
                 style: const TextStyle(color: Colors.grey, fontSize: 12)),
           ],
         ),
@@ -352,7 +381,7 @@ class ProductDetailScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildActionButtons(context),
               const SizedBox(height: 32),
-              _buildSimilarMedicines(context), // Pass context
+              _buildSimilarMedicines(context),
               const SizedBox(height: 20),
             ],
           ),
