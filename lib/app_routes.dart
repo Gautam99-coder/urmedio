@@ -10,7 +10,7 @@ import 'package:urmedio/screens/admin/inventory_screen.dart';
 import 'package:urmedio/screens/admin/orders_dashboard_screen.dart';
 import 'package:urmedio/screens/admin/updatastock_screen.dart';
 import 'package:urmedio/screens/auth/forgetpassword_screen.dart';
-import 'package:urmedio/screens/auth/otp_screen.dart';
+import 'package:urmedio/screens/auth/otp_verification_screen.dart';
 import 'package:urmedio/screens/auth/pharmacy_signup.dart';
 import 'package:urmedio/screens/auth/reset_password_screen.dart';
 import 'package:urmedio/screens/auth/signin_screen.dart';
@@ -38,8 +38,9 @@ import 'package:urmedio/screens/term_of_services_screen.dart';
 import 'package:urmedio/screens/view/notification_screen.dart';
 import 'package:urmedio/screens/view/pharmacydetail_screen.dart';
 import 'package:urmedio/services/call_screen.dart';
-import 'package:urmedio/widgets/medicine_card.dart';
+// import 'package:urmedio/widgets/medicine_card.dart'; // Not needed here
 import 'package:urmedio/widgets/setting_screen.dart';
+import 'package:urmedio/models/medicine_model.dart'; // ✅ IMPORT THE MEDICINE MODEL
 
 class AppRoutes {
   // Route constants
@@ -49,7 +50,7 @@ class AppRoutes {
   static const String signup = '/signup';
   static const String signin = '/signin';
   static const String pharmacySignup = '/pharmacySignup';
-  static const String homePage = '/homePage';
+  static const String home = '/homePage';
   static const String productPage = '/productPage';
   static const String cartPage = '/cartPage';
   static const String profilePage = '/profilePage';
@@ -96,10 +97,11 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const SigninScreen());
       case pharmacySignup:
         return MaterialPageRoute(builder: (_) => const PharmacySignup());
-      case homePage:
+      case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case productPage:
-        final medicine = settings.arguments as Medicine?;
+        // ✅ FIX: Use the correct Medicine model
+        final medicine = settings.arguments as Medicine?; 
         if (medicine != null) {
           return MaterialPageRoute(
               builder: (_) => ProductDetailScreen(medicine: medicine));
@@ -128,7 +130,10 @@ class AppRoutes {
       case forgetPass:
         return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
       case otpsrc:
-        return MaterialPageRoute(builder: (_) => const OtpVerificationScreen());
+        // Note: Your app seems to have two password reset flows.
+        // This OTP screen is one, but ForgotPasswordScreen uses an email link.
+        // Make sure you know which one you intend to use.
+        return MaterialPageRoute(builder: (_) => const OtpVerificationScreen(email: 'test@example.com')); // ✅ Added placeholder
       case restPass:
         return MaterialPageRoute(builder: (_) => const ResetPasswordScreen());
       case locationSrc:
@@ -175,6 +180,7 @@ class AppRoutes {
     return MaterialPageRoute(
       builder: (_) {
         return Scaffold(
+          appBar: AppBar(title: const Text('Error')),
           body: Center(
             child: Text('Error: $message'),
           ),
