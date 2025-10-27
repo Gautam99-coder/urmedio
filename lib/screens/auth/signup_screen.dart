@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart'; // ✅ 1. ADD THIS IMPORT
+// import 'package:cloud_firestore/cloud_firestore.dart'; // Not used here
+import 'package:urmedio/services/firebase_auth_methods.dart.dart';
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
-// ✅ 2. FIX THE TYPO (removed extra .dart)
-import '../../services/firebase_auth_methods.dart.dart';
 import '../splash_screen.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -40,6 +38,7 @@ class _SignupScreenState extends State<SignupScreen> {
   void _showSuccessDialog(String message, {bool navigateToSignIn = true}) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
@@ -54,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
               Text(
                 message,
                 style:
-                const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
@@ -79,10 +78,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     if (navigateToSignIn) {
+                      // Email sign up goes to sign in
                       Navigator.pushReplacementNamed(context, '/signin');
                     } else {
                       // Google sign-up now redirects to customer home
-                      Navigator.pushReplacementNamed(context, '/homePage');
+                      // This logic is now handled by _signInWithGoogle
                     }
                   },
                   child: Text(
@@ -100,6 +100,7 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _showErrorSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -121,12 +122,11 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // ✅ This line now works
-      await context.read<FirebaseAuthMethods>().signUpWithEmail(
-        name: nameController.text,
-        email: emailController.text,
-        password: passwordController.text,
-      );
+      await FirebaseAuthMethods(FirebaseAuth.instance).signUpWithEmail(
+            name: nameController.text,
+            email: emailController.text,
+            password: passwordController.text,
+          );
 
       if (!mounted) return;
       _showSuccessDialog('Registration Successful!');
@@ -156,8 +156,7 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
-      // ✅ This line now works
-      final authService = context.read<FirebaseAuthMethods>();
+      final authService = FirebaseAuthMethods(FirebaseAuth.instance);
       final userCredential = await authService.signInWithGoogle();
 
       if (!mounted) return;
@@ -333,8 +332,13 @@ class _SignupScreenState extends State<SignupScreen> {
             });
           },
         ),
-        const Text("Agree Terms & \nConditions"), // Your manual line break
-        const Spacer(),
+        const Expanded( // Use Expanded to prevent overflow
+          child: Text(
+            "Agree Terms & \nConditions",
+            style: TextStyle(fontSize: 14), // Slightly smaller font
+          ),
+        ),
+        // const Spacer(), // Spacer is redundant with Expanded
         GestureDetector(
           onTap: () {
             Navigator.pushNamed(context, '/pharmacySignup');
@@ -369,39 +373,39 @@ class _SignupScreenState extends State<SignupScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: AppColors.primaryButton)
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Sign up',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/circle.png'),
-                  fit: BoxFit.cover,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    offset: const Offset(2, 4),
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Sign up',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/circle.png'),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          spreadRadius: 1,
+                          offset: const Offset(2, 4),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -425,7 +429,7 @@ class _SignupScreenState extends State<SignupScreen> {
       width: double.infinity,
       child: OutlinedButton(
         onPressed: _isLoading ? null : _signInWithGoogle,
-        style: OutledButton.styleFrom(
+        style: OutlinedButton.styleFrom(
           padding: EdgeInsets.zero,
           backgroundColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -440,9 +444,9 @@ class _SignupScreenState extends State<SignupScreen> {
             image: _isLoading
                 ? null
                 : const DecorationImage(
-              image: AssetImage('assets/images/googleup.png'),
-              fit: BoxFit.cover,
-            ),
+                    image: AssetImage('assets/images/googleup.png'),
+                    fit: BoxFit.cover,
+                  ),
             color: _isLoading ? Colors.grey[300] : null,
             boxShadow: [
               BoxShadow(
@@ -488,7 +492,4 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 }
 
-// ✅ 3. REMOVE THE FAULTY EXTENSION FROM THE BOTTOM
-// extension on BuildContext {
-//   read() {}
-// }
+// ✅ 2. REMOVE THE FAULTY EXTENSION

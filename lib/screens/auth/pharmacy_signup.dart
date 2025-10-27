@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ 1. ADD FIREBASE IMPORT // ✅ 3. ADD SERVICE IMPORT
+import 'package:urmedio/services/firebase_auth_methods.dart.dart';
 import 'package:urmedio/theme/colors.dart';
-import 'package:urmedio/widgets/custom_textfield.dart'; // ✅ Reusable input field
+import 'package:urmedio/widgets/custom_textfield.dart';
 
 class PharmacySignup extends StatefulWidget {
   const PharmacySignup({super.key});
@@ -10,21 +12,19 @@ class PharmacySignup extends StatefulWidget {
 }
 
 class _PharmacySignupState extends State<PharmacySignup> {
-  // ✅ GlobalKey for validating the whole form
   final _formKey = GlobalKey<FormState>();
 
-  // ✅ Text controllers for all fields
   final TextEditingController pharmacyIdController = TextEditingController();
   final TextEditingController pharmacyNameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
-  bool agreeTerms = false; // ✅ For checkbox
+  bool agreeTerms = false;
+  bool _isLoading = false; // ✅ 4. ADD LOADING STATE
 
   @override
   void dispose() {
-    // ✅ Always dispose controllers
     pharmacyIdController.dispose();
     pharmacyNameController.dispose();
     emailController.dispose();
@@ -33,10 +33,22 @@ class _PharmacySignupState extends State<PharmacySignup> {
     super.dispose();
   }
 
-  // ✅ Show success popup after registration
+  // ✅ 5. ADD ERROR SNACKBAR
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  // This success dialog is perfect and already redirects to '/phomePage'
   void _showSuccessDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false, // Don't dismiss on tap
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -57,7 +69,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 25),
-              // ✅ Continue button to go to pharmacy home page
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -74,7 +85,8 @@ class _PharmacySignupState extends State<PharmacySignup> {
                   ),
                   onPressed: () {
                     Navigator.of(context).pop(); // Close popup
-                    Navigator.pushReplacementNamed(context, '/phomePage'); // ✅ Go to pharmacy home
+                    Navigator.pushReplacementNamed(
+                        context, '/phomePage'); // Go to pharmacy home
                   },
                 ),
               ),
@@ -85,32 +97,55 @@ class _PharmacySignupState extends State<PharmacySignup> {
     );
   }
 
-  // ✅ Function to handle sign-up validation logic
-  void _signUp() {
-    if (_formKey.currentState!.validate()) {
-      if (!agreeTerms) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You must agree to the Terms & Conditions.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
+  // ✅ 6. REWRITE _signUp TO BE ASYNC AND CALL FIREBASE
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    if (!agreeTerms) {
+      _showErrorSnackBar('You must agree to the Terms & Conditions.');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await FirebaseAuthMethods(FirebaseAuth.instance).signUpWithPharmacyEmail(
+            pharmacyId: pharmacyIdController.text,
+            pharmacyName: pharmacyNameController.text,
+            email: emailController.text,
+            password: passwordController.text,
+          );
+
+      if (!mounted) return;
+      _showSuccessDialog();
+    } on FirebaseAuthException catch (e) {
+      String message = 'Registration failed.';
+      if (e.code == 'weak-password') {
+        message = 'The password provided is too weak.';
+      } else if (e.code == 'email-already-in-use') {
+        message = 'An account already exists for that email.';
+      } else {
+        message = e.message ?? message;
       }
-      _showSuccessDialog(); // ✅ If valid and agreed, show success popup
+      _showErrorSnackBar(message);
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('An unexpected error occurred. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Screen width for responsiveness
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // ✅ Background image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -119,7 +154,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
               ),
             ),
           ),
-
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(screenWidth * 0.05),
@@ -128,15 +162,12 @@ class _PharmacySignupState extends State<PharmacySignup> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ Back Arrow Button
                     IconButton(
                       icon: const Icon(Icons.arrow_back, size: 28),
                       color: Colors.black,
                       onPressed: () => Navigator.pushNamed(context, '/signup'),
                     ),
                     SizedBox(height: screenWidth * 0.1),
-
-                    // ✅ Title
                     const Text(
                       "Create \nPharmacy Account",
                       style: TextStyle(
@@ -147,7 +178,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
                     ),
                     SizedBox(height: screenWidth * 0.05),
 
-                    // ✅ Input fields using CustomTextField
+                    // --- ALL YOUR CustomTextFields (UNCHANGED) ---
                     CustomTextField(
                       label: "Pharmacy ID",
                       prefixIcon: Icons.local_pharmacy_outlined,
@@ -160,7 +191,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       },
                     ),
                     SizedBox(height: screenWidth * 0.04),
-
                     CustomTextField(
                       label: "Pharmacy Name",
                       prefixIcon: Icons.store_outlined,
@@ -173,7 +203,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       },
                     ),
                     SizedBox(height: screenWidth * 0.04),
-
                     CustomTextField(
                       label: "Email",
                       prefixIcon: Icons.email_outlined,
@@ -190,7 +219,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       },
                     ),
                     SizedBox(height: screenWidth * 0.04),
-
                     CustomTextField(
                       label: "Password",
                       prefixIcon: Icons.lock_outline,
@@ -207,7 +235,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       },
                     ),
                     SizedBox(height: screenWidth * 0.04),
-
                     CustomTextField(
                       label: "Confirm Password",
                       prefixIcon: Icons.lock_outline,
@@ -223,8 +250,8 @@ class _PharmacySignupState extends State<PharmacySignup> {
                         return null;
                       },
                     ),
+                    // --- End of TextFields ---
 
-                    // ✅ Terms Checkbox
                     Row(
                       children: [
                         Checkbox(
@@ -241,8 +268,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                         ),
                       ],
                     ),
-
-                    // ✅ Signup button
                     SizedBox(height: screenWidth * 0.02),
                     Align(
                       alignment: Alignment.centerRight,
@@ -250,7 +275,8 @@ class _PharmacySignupState extends State<PharmacySignup> {
                         height: 50,
                         width: double.infinity,
                         child: OutlinedButton(
-                          onPressed: _signUp,
+                          // ✅ 7. UPDATE onPressed
+                          onPressed: _isLoading ? null : _signUp,
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.only(left: screenWidth * 0.55),
                             side: BorderSide.none,
@@ -260,56 +286,55 @@ class _PharmacySignupState extends State<PharmacySignup> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                onTap: _signUp,
-                                hoverColor: Colors.transparent,
-                                splashColor: Colors.transparent,
-                                child: const Text(
-                                  'Sign up',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              InkWell(
-                                onTap: _signUp,
-                                hoverColor: Colors.transparent,
-                                splashColor: Colors.transparent,
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    image: const DecorationImage(
-                                      image: AssetImage('assets/images/circle.png'),
-                                      fit: BoxFit.cover,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.25),
-                                        blurRadius: 6,
-                                        spreadRadius: 1,
-                                        offset: const Offset(2, 4),
+                          // ✅ 8. ADD LOADING INDICATOR
+                          child: _isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                  color: AppColors.primaryButton,
+                                ))
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Text(
+                                      'Sign up',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      width: 40,
+                                      height: 40,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(20),
+                                        image: const DecorationImage(
+                                          image: AssetImage(
+                                              'assets/images/circle.png'),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withOpacity(0.25),
+                                            blurRadius: 6,
+                                            spreadRadius: 1,
+                                            offset: const Offset(2, 4),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: screenWidth * 0.05),
-
-                    // ✅ Divider
-                    Row(
-                      children: const [
+                    
+                    // --- Divider and Sign In (UNCHANGED) ---
+                    const Row(
+                      children: [
                         Expanded(child: Divider(thickness: 1)),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -319,8 +344,6 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       ],
                     ),
                     SizedBox(height: screenWidth * 0.05),
-
-                    // ✅ Navigation to Sign In
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
