@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart'; // ✅ THE FIX IS THIS IMPORT LINE
+import 'package:urmedio/services/firebase_auth_methods.dart.dart';
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
 
-import '../../services/firebase_auth_methods.dart.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -37,10 +36,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void _showSuccessDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -92,10 +92,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // ✅ This line now works
-      await context.read<FirebaseAuthMethods>().sendPasswordResetEmail(
-        email: emailController.text,
-      );
+      await FirebaseAuthMethods(FirebaseAuth.instance).sendPasswordResetEmail(
+            email: emailController.text,
+          );
       if (mounted) _showSuccessDialog();
     } on FirebaseAuthException catch (e) {
       _showErrorSnackBar(e.message ?? 'Failed to send link.');
@@ -186,9 +185,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
                             : const Text(
-                          'SEND RESET LINK',
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
+                                'SEND RESET LINK',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                              ),
                       ),
                     ),
                   ],
