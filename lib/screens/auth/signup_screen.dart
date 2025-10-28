@@ -418,48 +418,47 @@ class _SignupScreenState extends State<SignupScreen> {
       ],
     );
   }
-
-  Widget _buildGoogleSignUpButton() {
-    return SizedBox(
-      height: 50,
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: _isLoading ? null : _signInWithGoogle,
-        style: OutledButton.styleFrom(
-          padding: EdgeInsets.zero,
-          backgroundColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          side: BorderSide.none,
+Widget _buildGoogleSignUpButton() {
+  return SizedBox(
+    height: 50,
+    width: double.infinity,
+    child: OutlinedButton(
+      onPressed: _isLoading ? null : _signInWithGoogle,
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Container(
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: _isLoading
-                ? null
-                : const DecorationImage(
-              image: AssetImage('assets/images/googleup.png'),
-              fit: BoxFit.cover,
-            ),
-            color: _isLoading ? Colors.grey[300] : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 6,
-                spreadRadius: 1,
-                offset: const Offset(2, 4),
-              ),
-            ],
-          ),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : null,
-        ),
+        side: BorderSide.none,
       ),
-    );
-  }
+      child: Container(
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          image: _isLoading
+              ? null
+              : const DecorationImage(
+                  image: AssetImage('assets/images/googleup.png'),
+                  fit: BoxFit.cover,
+                ),
+          color: _isLoading ? Colors.grey[300] : null,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              spreadRadius: 1,
+              offset: const Offset(2, 4),
+            ),
+          ],
+        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : null,
+      ),
+    ),
+  );
+}
 
   Widget _buildSignInNavigation(double screenWidth) {
     return Column(
