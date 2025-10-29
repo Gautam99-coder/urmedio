@@ -49,6 +49,6 @@ class AppColors {
   static const Color shadow = Colors.black26;
   static const Color border = Color(0xFFDDDDDD);
 
-// Example usage:
-// Container(color: AppColors.primary)
+  // Example usage:
+  // Container(color: AppColors.primary)
 }
