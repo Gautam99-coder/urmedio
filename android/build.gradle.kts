@@ -1,4 +1,3 @@
-// Top-level build.gradle.kts file for Android
 
 buildscript {
     repositories {

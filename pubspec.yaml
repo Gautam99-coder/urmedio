@@ -29,6 +29,8 @@ dependencies:
   firebase_auth: ^4.15.3
   cloud_firestore: ^4.15.0
   google_sign_in: ^6.1.6
+  provider: ^6.1.5+1
+  cached_network_image: ^3.4.1
   # google_sign_in_android: ^7.2.1 # Generally not needed when using google_sign_in
   
 dev_dependencies:
