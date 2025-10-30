@@ -45,7 +45,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 20),
-              const Icon(Icons.email_outlined, color: AppColors.sky, size: 80),
+              const Icon(Icons.email_outlined, color: AppColors.info, size: 80),
               const SizedBox(height: 20),
               const Text(
                 'Check Your Email',

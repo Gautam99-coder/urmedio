@@ -56,7 +56,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 20),
-              const Icon(Icons.check_circle, color: AppColors.sky, size: 80),
+              const Icon(Icons.check_circle, color: AppColors.info, size: 80),
               const SizedBox(height: 20),
               const Text(
                 'Registration Successful!',

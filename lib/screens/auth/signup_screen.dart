@@ -49,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const SizedBox(height: 20),
-              const Icon(Icons.check_circle, color: AppColors.sky, size: 80),
+              const Icon(Icons.check_circle, color: AppColors.info, size: 80),
               const SizedBox(height: 20),
               Text(
                 message,
