@@ -101,7 +101,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const HomeScreen());
       case productPage:
         // ✅ FIX: Use the correct Medicine model
-        final medicine = settings.arguments as Medicine?; 
+        final medicine = settings.arguments as Medicine?;
         if (medicine != null) {
           return MaterialPageRoute(
               builder: (_) => ProductDetailScreen(medicine: medicine));
@@ -128,7 +128,7 @@ class AppRoutes {
       case settingScr:
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
       case forgetPass:
-        return MaterialPageRoute(builder: (_) => const ForgotPasswordScreen());
+        return MaterialPageRoute(builder: (_) => const ForgetPasswordScreen());
       case otpsrc:
         // Note: Your app seems to have two password reset flows.
         // This OTP screen is one, but ForgotPasswordScreen uses an email link.
