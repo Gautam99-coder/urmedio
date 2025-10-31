@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart'; // <--- required!
-import 'package:urmedio/app_routes.dart';
-import 'package:urmedio/services/firebase_auth_methods.dart.dart'; // ensure this file exists
+import 'package:provider/provider.dart';
+import 'package:urmedio/app_routes.dart'; // Your routes file
+import 'package:urmedio/services/firebase_auth_methods.dart.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    // Add your Firebase options here if needed
+    // options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MultiProvider(
       providers: [
-        Provider<FirebaseAuthMethods>(
-          create: (_) => FirebaseAuthMethods(FirebaseAuth.instance),
+        // ✅ 2. FIXED CLASS NAME: Use 'AuthService'
+        Provider<AuthService>(
+          create: (_) => AuthService(),
         ),
         StreamProvider<User?>(
-          // if authState is a Stream<User?> inside FirebaseAuthMethods
-          create: (context) => context.read<FirebaseAuthMethods>().authState,
+          // ✅ 3. FIXED CLASS NAME and STREAM NAME
+          create: (context) => context.read<AuthService>().authStateChanges,
           initialData: null,
         ),
       ],
@@ -35,6 +39,7 @@ class UrMedioApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'UrMedio',
       theme: ThemeData(primarySwatch: Colors.blue),
+      // Use your defined routes
       initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRoutes.generateRoute,
     );
