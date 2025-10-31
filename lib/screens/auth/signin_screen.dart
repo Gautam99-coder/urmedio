@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:urmedio/services/firebase_auth_methods.dart.dart';
+import 'package:provider/provider.dart'; // ✅ 1. ADD PROVIDER IMPORT
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
 
+import '../../services/firebase_auth_methods.dart.dart';
 
 class SigninScreen extends StatefulWidget {
   const SigninScreen({super.key});
@@ -17,6 +18,8 @@ class _SigninScreenState extends State<SigninScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
+
+  // final AuthService _authService = AuthService(); // ❌ 2. REMOVE THIS LINE
 
   @override
   void dispose() {
@@ -35,20 +38,20 @@ class _SigninScreenState extends State<SigninScreen> {
     );
   }
 
-  // ---------------- Email / Password Sign-In ----------------
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
 
     try {
-      final authService = FirebaseAuthMethods(FirebaseAuth.instance);
+      // ✅ 3. READ THE SERVICE FROM CONTEXT
+      final authService = context.read<AuthService>();
+
       await authService.signInWithEmail(
-        email: emailController.text,
-        password: passwordController.text,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
 
-      // Get the correct redirect route
       final route = await authService.getRedirectRoute();
       if (mounted) {
         Navigator.pushReplacementNamed(context, route);
@@ -72,34 +75,13 @@ class _SigninScreenState extends State<SigninScreen> {
     }
   }
 
-  // ---------------- Google Sign-In ----------------
   Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
-    try {
-      final authService = FirebaseAuthMethods(FirebaseAuth.instance);
-      final userCredential = await authService.signInWithGoogle();
-
-      if (!mounted) return;
-
-      if (userCredential != null) {
-        // Get the correct redirect route
-        final route = await authService.getRedirectRoute();
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, route);
-        }
-      }
-      // If userCredential is null, the user cancelled, so do nothing.
-    } on Exception catch (e) {
-      _showErrorSnackBar('Google Sign-In failed: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    // Left empty as requested
+    _showErrorSnackBar("Google Sign-In is not active yet.");
   }
 
-  // ---------------- UI Build (Unchanged) ----------------
-
+  // --- UI Build (Unchanged) ---
+  // ... (all your _build... methods are unchanged)
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -146,8 +128,6 @@ class _SigninScreenState extends State<SigninScreen> {
       ),
     );
   }
-
-  // --- ALL YOUR UI BUILDER METHODS (UNCHANGED) ---
 
   Widget _buildHeader(double screenWidth) {
     return Column(
@@ -211,7 +191,6 @@ class _SigninScreenState extends State<SigninScreen> {
       children: [
         GestureDetector(
           onTap: () {
-            // This navigation now works because we added the route
             Navigator.pushNamed(context, '/forgetPass');
           },
           child: const Padding(
@@ -247,39 +226,39 @@ class _SigninScreenState extends State<SigninScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: AppColors.primaryButton)
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Sign in',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/circle.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: const Offset(2, 4),
-                        ),
-                      ],
-                    ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sign in',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/circle.png'),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                    offset: const Offset(2, 4),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -318,9 +297,9 @@ class _SigninScreenState extends State<SigninScreen> {
             image: _isLoading
                 ? null
                 : const DecorationImage(
-                    image: AssetImage('assets/images/googleup.png'),
-                    fit: BoxFit.cover,
-                  ),
+              image: AssetImage('assets/images/googleup.png'),
+              fit: BoxFit.cover,
+            ),
             color: _isLoading ? Colors.grey[300] : null,
             boxShadow: [
               BoxShadow(

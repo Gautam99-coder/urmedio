@@ -1,8 +1,10 @@
+// lib/screens/pharmacy_signup.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // ✅ 1. ADD FIREBASE IMPORT // ✅ 3. ADD SERVICE IMPORT
-import 'package:urmedio/services/firebase_auth_methods.dart.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // ✅ 1. ADD FIREBASE IMPORT
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
+
+import '../../services/firebase_auth_methods.dart.dart';
 
 class PharmacySignup extends StatefulWidget {
   const PharmacySignup({super.key});
@@ -20,8 +22,11 @@ class _PharmacySignupState extends State<PharmacySignup> {
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  // ✅ 3. Create an instance of our service
+  final AuthService _authService = AuthService();
+
   bool agreeTerms = false;
-  bool _isLoading = false; // ✅ 4. ADD LOADING STATE
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,7 +38,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
     super.dispose();
   }
 
-  // ✅ 5. ADD ERROR SNACKBAR
+  // ✅ 4. ADD ERROR SNACKBAR (Unchanged)
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -44,7 +49,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
     );
   }
 
-  // This success dialog is perfect and already redirects to '/phomePage'
+  // This success dialog is perfect and already redirects to '/phomePage' (Unchanged)
   void _showSuccessDialog() {
     showDialog(
       context: context,
@@ -97,7 +102,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
     );
   }
 
-  // ✅ 6. REWRITE _signUp TO BE ASYNC AND CALL FIREBASE
+  // ✅ 5. REWRITE _signUp TO USE THE SIMPLE SERVICE
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -109,12 +114,13 @@ class _PharmacySignupState extends State<PharmacySignup> {
     setState(() => _isLoading = true);
 
     try {
-      await FirebaseAuthMethods(FirebaseAuth.instance).signUpWithPharmacyEmail(
-            pharmacyId: pharmacyIdController.text,
-            pharmacyName: pharmacyNameController.text,
-            email: emailController.text,
-            password: passwordController.text,
-          );
+      // Use our simple auth service
+      await _authService.signUpWithPharmacyEmail(
+        pharmacyId: pharmacyIdController.text.trim(),
+        pharmacyName: pharmacyNameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
 
       if (!mounted) return;
       _showSuccessDialog();
@@ -224,6 +230,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
                       prefixIcon: Icons.lock_outline,
                       controller: passwordController,
                       isPassword: true,
+
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a password';
@@ -275,7 +282,7 @@ class _PharmacySignupState extends State<PharmacySignup> {
                         height: 50,
                         width: double.infinity,
                         child: OutlinedButton(
-                          // ✅ 7. UPDATE onPressed
+                          // ✅ 6. UPDATE onPressed
                           onPressed: _isLoading ? null : _signUp,
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.only(left: screenWidth * 0.55),
@@ -286,52 +293,54 @@ class _PharmacySignupState extends State<PharmacySignup> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          // ✅ 8. ADD LOADING INDICATOR
+                          // ✅ 7. ADD LOADING INDICATOR
                           child: _isLoading
                               ? const Center(
-                                  child: CircularProgressIndicator(
-                                  color: AppColors.primaryButton,
-                                ))
+                              child: CircularProgressIndicator(
+                                color: AppColors.primaryButton,
+                              ))
                               : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'Sign up',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(20),
-                                        image: const DecorationImage(
-                                          image: AssetImage(
-                                              'assets/images/circle.png'),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black
-                                                .withOpacity(0.25),
-                                            blurRadius: 6,
-                                            spreadRadius: 1,
-                                            offset: const Offset(2, 4),
-                                          ),
-                                        ],
-                                      ),
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Sign up',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black, // Added color
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius:
+                                  BorderRadius.circular(20),
+                                  image: const DecorationImage(
+                                    image: AssetImage(
+                                        'assets/images/circle.png'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black
+                                          .withOpacity(0.25),
+                                      blurRadius: 6,
+                                      spreadRadius: 1,
+                                      offset: const Offset(2, 4),
                                     ),
                                   ],
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: screenWidth * 0.05),
-                    
+
                     // --- Divider and Sign In (UNCHANGED) ---
                     const Row(
                       children: [

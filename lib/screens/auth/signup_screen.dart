@@ -1,13 +1,10 @@
-// lib/screens/signup_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:cloud_firestore/cloud_firestore.dart'; // No longer needed here
-// import 'package:provider/provider.dart'; // ✅ 1. REMOVED PROVIDER
+import 'package:provider/provider.dart'; // ✅ 1. ADD PROVIDER IMPORT
 import 'package:urmedio/theme/colors.dart';
 import 'package:urmedio/widgets/custom_textfield.dart';
-// ✅ 2. Import our new simple service
-import '../../services/firebase_auth_methods.dart';
-import '../splash_screen.dart'; // Assuming you have this file
+import '../../services/firebase_auth_methods.dart.dart';
+import '../splash_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -24,8 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
-  // ✅ 3. Create an instance of our service
-  final AuthService _authService = AuthService();
+  // final AuthService _authService = AuthService(); // ❌ 2. REMOVE THIS LINE
 
   bool agreeTerms = false;
   bool _isLoading = false;
@@ -39,8 +35,7 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
-  // ---------------- Dialogs & Snackbars (Unchanged) ----------------
-
+  // ... (Dialogs and SnackBar methods are unchanged) ...
   void _showSuccessDialog(String message, {bool navigateToSignIn = true}) {
     showDialog(
       context: context,
@@ -58,7 +53,7 @@ class _SignupScreenState extends State<SignupScreen> {
               Text(
                 message,
                 style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
@@ -85,7 +80,6 @@ class _SignupScreenState extends State<SignupScreen> {
                     if (navigateToSignIn) {
                       Navigator.pushReplacementNamed(context, '/signin');
                     } else {
-                      // This part is for Google, but we'll leave it for now
                       Navigator.pushReplacementNamed(context, '/homePage');
                     }
                   },
@@ -112,7 +106,6 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  // ---------------- Email/Password Sign Up (Corrected) ----------------
 
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
@@ -125,8 +118,8 @@ class _SignupScreenState extends State<SignupScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // ✅ 4. Use our simple auth service
-      await _authService.signUpWithEmail(
+      // ✅ 3. READ THE SERVICE FROM CONTEXT
+      await context.read<AuthService>().signUpWithEmail(
         name: nameController.text.trim(),
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
@@ -155,15 +148,12 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
-  // ---------------- Google Sign In / Sign Up (Ignored as requested) ----------------
-
   Future<void> _signInWithGoogle() async {
-    // Left empty as requested.
     _showErrorSnackBar("Google Sign-In is not active yet.");
   }
 
-  // ---------------- Main Build (Unchanged) ----------------
-
+  // --- UI Build (Unchanged) ---
+  // ... (all your _build... methods are unchanged)
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -172,7 +162,6 @@ class _SignupScreenState extends State<SignupScreen> {
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -181,7 +170,6 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
           ),
-          // Scrollable Form Content
           SafeArea(
             child: SingleChildScrollView(
               padding: EdgeInsets.all(screenWidth * 0.05),
@@ -212,8 +200,6 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
-  // --- ALL YOUR UI BUILDER METHODS (UNCHANGED) ---
 
   Widget _buildHeader(double screenWidth) {
     return Column(
@@ -313,7 +299,7 @@ class _SignupScreenState extends State<SignupScreen> {
             });
           },
         ),
-        const Expanded( // Use Expanded to prevent overflow
+        const Expanded(
           child: Text("Agree Terms & \nConditions"),
         ),
         const Spacer(),
@@ -351,39 +337,39 @@ class _SignupScreenState extends State<SignupScreen> {
         child: _isLoading
             ? const CircularProgressIndicator(color: AppColors.primaryButton)
             : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'Sign up',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      image: const DecorationImage(
-                        image: AssetImage('assets/images/circle.png'),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 6,
-                          spreadRadius: 1,
-                          offset: const Offset(2, 4),
-                        ),
-                      ],
-                    ),
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Sign up',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/circle.png'),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                    offset: const Offset(2, 4),
                   ),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -422,9 +408,9 @@ class _SignupScreenState extends State<SignupScreen> {
             image: _isLoading
                 ? null
                 : const DecorationImage(
-                    image: AssetImage('assets/images/googleup.png'),
-                    fit: BoxFit.cover,
-                  ),
+              image: AssetImage('assets/images/googleup.png'),
+              fit: BoxFit.cover,
+            ),
             color: _isLoading ? Colors.grey[300] : null,
             boxShadow: [
               BoxShadow(
